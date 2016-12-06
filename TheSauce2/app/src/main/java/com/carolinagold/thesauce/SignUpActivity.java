@@ -74,7 +74,11 @@ public class SignUpActivity extends AppCompatActivity {
             super.onCreate(savedInstanceState);
             setContentView(R.layout.activity_sign_up);
 
+            prepare();
+        }
 
+
+        private void prepare() {
             mAuth = FirebaseAuth.getInstance();
 
 
@@ -137,10 +141,6 @@ public class SignUpActivity extends AppCompatActivity {
 
             mSignUpFormView = findViewById(R.id.sign_up_form);
             mProgressView = findViewById(R.id.sign_up_progress);
-
-
-
-
         }
 
         @Override
