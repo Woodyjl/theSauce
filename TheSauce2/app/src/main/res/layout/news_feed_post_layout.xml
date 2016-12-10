@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical" android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="75dp"
     android:background="@color/news_feed_post_bg_color">
     
     <LinearLayout
@@ -16,7 +16,8 @@
             android:id="@+id/news_feed_post_layout_profile_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"/>
+            android:layout_gravity="center_vertical"
+            android:hint="name"/>
     </LinearLayout>
 
     <LinearLayout
@@ -28,12 +29,14 @@
             android:id="@+id/news_feed_post_layout_location"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="50"/>
+            android:layout_weight="50"
+            android:hint="location"/>
         <TextView
             android:id="@+id/news_feed_post_layout_date"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="50"/>
+            android:layout_weight="50"
+            android:hint="date"/>
     </LinearLayout>
 
     <ImageView
@@ -44,6 +47,7 @@
     <TextView
         android:id="@+id/news_feed_post_layout_caption"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:hint="this is cool caption"/>
 
 </LinearLayout>

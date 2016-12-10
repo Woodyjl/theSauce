@@ -12,19 +12,17 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.support.v4.app.Fragment;
 
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+
 import java.util.ArrayList;
 import java.util.List;
 
 
-/**
- * A simple {@link Fragment} subclass.
- * Activities that contain this fragment must implement the
- * {@link NewFeedFragment.OnFragmentInteractionListener} interface
- * to handle interaction events.
- * Use the {@link NewFeedFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
-public class NewFeedFragment extends Fragment implements MainActivity.NewsFeedFetchCallBack{
+public class NewFeedFragment extends Fragment {
 
     RecyclerView recyclerView;
 
@@ -34,7 +32,6 @@ public class NewFeedFragment extends Fragment implements MainActivity.NewsFeedFe
 
     public NewFeedFragment() {
         // Required empty public constructor
-
     }
 
     public static NewFeedFragment newInstance() {
@@ -61,21 +58,46 @@ public class NewFeedFragment extends Fragment implements MainActivity.NewsFeedFe
             theList.add(new Post("n " + i, " HelloWorld", " HelloWorld"," HelloWorld"," HelloWorld"," HelloWorld"));
         }
 
+        recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         NewsFeedAdaptor adapter = new NewsFeedAdaptor(getContext(), theList);
-        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         recyclerView.setAdapter(adapter);
-        ready = true;
+        getLatestPost();
         return view;
     }
 
-    boolean ready = false;
+    private void getLatestPost() {
+        FirebaseDatabase dbRef = FirebaseDatabase.getInstance();
+        DatabaseReference myRef = dbRef.getReference("Post");
 
-    public void updateFeed(List<Post> list) {
-        ((NewsFeedAdaptor) recyclerView.getAdapter()).updateFeedList(list);
+        ((MainActivity) getActivity()).showProgress(true);
+        final NewsFeedAdaptor adaptor = (NewsFeedAdaptor) recyclerView.getAdapter();
+        myRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+
+                List<Post> listOfPosts = new ArrayList<Post>();
+
+                for (DataSnapshot postByUser : dataSnapshot.getChildren()) {
+                    System.out.println(postByUser);
+                    for (DataSnapshot post : postByUser.getChildren()) {
+                        //System.out.println("value: " + post.getValue(Post.class));
+                        listOfPosts.add(post.getValue(Post.class));
+                    }
+
+                    //System.out.println("child: " + post.getChildren());
+                }
+                ((MainActivity) getActivity()).showProgress(false);
+                adaptor.updateFeedList(listOfPosts);
+                adaptor.notifyDataSetChanged();
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.i(Logs.POINT_OF_INTEREST, "Failed retrieving data from firebase from method: getLatestPost");
+                ((MainActivity) getActivity()).showProgress(false);
+            }
+        });
     }
-
-    @Override
-    public boolean ready() {return ready;}
 
     // TODO: Rename method, update argument and hook method into UI event
     public void onButtonPressed(Uri uri) {

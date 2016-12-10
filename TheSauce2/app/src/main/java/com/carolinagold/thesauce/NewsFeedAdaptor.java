@@ -10,6 +10,7 @@ import android.widget.TextView;
 
 
 import java.util.List;
+import java.util.Observable;
 
 /**
  * Created by woodyjean-louis on 12/9/16.
@@ -23,9 +24,18 @@ public class NewsFeedAdaptor extends RecyclerView.Adapter<NewsFeedAdaptor.PostVi
     private List<Post> posts;
 
     // Pass in the contact array into the constructor
-    public NewsFeedAdaptor(Context context, List<Post> posts) {
+    public NewsFeedAdaptor(Context context, final List<Post> posts) {
         this.context = context;
         this.posts = posts;
+
+        registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
+            @Override
+            public void onChanged() {
+                super.onChanged();
+                for (int i = 0; i < posts.size(); i++)
+                notifyItemChanged(i);
+            }
+        });
     }
 
     // Easy access to the context object in the recyclerview
@@ -35,7 +45,6 @@ public class NewsFeedAdaptor extends RecyclerView.Adapter<NewsFeedAdaptor.PostVi
 
     public void updateFeedList(List<Post> list) {
         posts = list;
-        notifyDataSetChanged();
     }
 
     // Usually involves inflating a layout from XML and returning the holder

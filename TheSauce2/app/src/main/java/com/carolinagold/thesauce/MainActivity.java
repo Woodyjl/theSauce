@@ -111,7 +111,7 @@ public class MainActivity extends AppCompatActivity implements OnFragmentInterac
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        //getSupportActionBar().setDisplayHomeAsUpEnabled(false);
         // Create the adapter that will return a fragment for each of the three
         // primary sections of the activity.
         mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
@@ -167,7 +167,6 @@ public class MainActivity extends AppCompatActivity implements OnFragmentInterac
 
 
         Fragment fragment = new NewFeedFragment();
-        getLatestPost((NewsFeedFetchCallBack) fragment);
 //        Bundle args = new Bundle();
 //        args.putSerializable("posts", (Serializable) getLatestPost());
 //        fragment.setArguments(args);
@@ -180,38 +179,7 @@ public class MainActivity extends AppCompatActivity implements OnFragmentInterac
 
     boolean progressShown = false;
 
-    private void getLatestPost(final NewsFeedFetchCallBack delegate) {
-        FirebaseDatabase dbRef = FirebaseDatabase.getInstance();
-        DatabaseReference myRef = dbRef.getReference("Post");
 
-        showProgress(true);
-
-        myRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-
-                List<Post> listOfPosts = new ArrayList<Post>();
-
-                for (DataSnapshot postByUser : dataSnapshot.getChildren()) {
-                    System.out.println(postByUser);
-                    for (DataSnapshot post : postByUser.getChildren()) {
-                        //System.out.println("value: " + post.getValue(Post.class));
-                        listOfPosts.add(post.getValue(Post.class));
-                    }
-
-                    //System.out.println("child: " + post.getChildren());
-                }
-                showProgress(false);
-                while (!delegate.ready()) {}
-                delegate.updateFeed(listOfPosts);
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                Log.i(Logs.POINT_OF_INTEREST, "Failed retrieving data from firebase from method: getLatestPost");
-                showProgress(false);
-            }
-        });
 
 //        ChildEventListener childEventListener = new ChildEventListener() {
 //            @Override
@@ -276,7 +244,7 @@ public class MainActivity extends AppCompatActivity implements OnFragmentInterac
 //        // due to sorting by push() keys
 //        Query recentPostsQuery = databaseReference.child("posts")
 //                .limitToFirst(100);
-    }
+
 
 
     @Override
@@ -310,7 +278,7 @@ public class MainActivity extends AppCompatActivity implements OnFragmentInterac
      * Shows the progress UI and hides the login form.
      */
     @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
-    private void showProgress(final boolean show) {
+    public void showProgress(final boolean show) {
         // On Honeycomb MR2 we have the ViewPropertyAnimator APIs, which allow
         // for very easy animations. If available, use these APIs to fade-in
         // the progress spinner.
@@ -375,11 +343,5 @@ public class MainActivity extends AppCompatActivity implements OnFragmentInterac
         public CharSequence getPageTitle(int position) {
             return mFragmentTitleList.get(position);
         }
-    }
-
-    public interface NewsFeedFetchCallBack {
-        public void updateFeed(List<Post> list);
-
-        public boolean ready();
     }
 }
