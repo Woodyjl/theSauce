@@ -24,14 +24,20 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -115,21 +121,11 @@ public class MainActivity extends AppCompatActivity implements ProfileFragment.O
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+                Snackbar.make(view, "Cool! you want to create a new post", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
 
                 //Create a new post
-                FirebaseDatabase database = FirebaseDatabase.getInstance();
-                DatabaseReference myRef = database.getReference("Post");
-
-                String uId = user.getUid();
-                myRef.child(uId).push().child("userProfilePicturePath").setValue("Hello, World!");
-                myRef.child(uId).push().child("userName").setValue("Hello, World!");
-                myRef.child(uId).push().child("uId").setValue("Hello, World!");
-                myRef.child(uId).push().child("location").setValue("Hello, World!");
-                myRef.child(uId).push().child("caption").setValue("Hello, World!");
-                myRef.child(uId).push().child("date").setValue("Hello, World!");
-                myRef.child(uId).push().child("imagePath").setValue("Hello, World!");
+                getLatestPost();
             }
         });
 
@@ -161,17 +157,101 @@ public class MainActivity extends AppCompatActivity implements ProfileFragment.O
 
     private void setupViewPager(ViewPager viewPager) {
         SectionsPagerAdapter adapter = new SectionsPagerAdapter(getSupportFragmentManager());
-        Fragment fragment = new ProfileFragment();
-        Bundle args = new Bundle();
-        //args.putSerializable(getLatestPost());
-        fragment.setArguments(args);
-        adapter.addFragment(new ProfileFragment(), "ONE");
-        adapter.addFragment(new ProfileFragment(),getString(R.string.profile_fragment));
+
+        Fragment fragment = new NewFeedFragment();
+//        Bundle args = new Bundle();
+//        args.putSerializable("posts", (Serializable) getLatestPost());
+//        fragment.setArguments(args);
+//        adapter.addFragment(fragment, getString(R.string.news_feed_fragment));
+
+        fragment = new ProfileFragment();
+        adapter.addFragment(fragment,getString(R.string.profile_fragment));
         viewPager.setAdapter(adapter);
     }
 
     private List<Post> getLatestPost() {
-        return  null;
+        FirebaseDatabase dbRef = FirebaseDatabase.getInstance();
+        DatabaseReference myRef = dbRef.getReference("Post");
+
+        myRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                int counter = 0;
+                System.out.println(dataSnapshot.getValue(Post.class));
+                System.out.println("\ncounter :" + ++counter);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.i(Logs.POINT_OF_INTEREST, "Failed retrieving data from firebase from method: getLatestPost");
+            }
+        });
+
+        return null;
+
+//        ChildEventListener childEventListener = new ChildEventListener() {
+//            @Override
+//            public void onChildAdded(DataSnapshot dataSnapshot, String previousChildName) {
+//                Log.d(TAG, "onChildAdded:" + dataSnapshot.getKey());
+//
+//                // A new comment has been added, add it to the displayed list
+//                Comment comment = dataSnapshot.getValue(Comment.class);
+//
+//                // ...
+//            }
+//
+//            @Override
+//            public void onChildChanged(DataSnapshot dataSnapshot, String previousChildName) {
+//                Log.d(TAG, "onChildChanged:" + dataSnapshot.getKey());
+//
+//                // A comment has changed, use the key to determine if we are displaying this
+//                // comment and if so displayed the changed comment.
+//                Comment newComment = dataSnapshot.getValue(Comment.class);
+//                String commentKey = dataSnapshot.getKey();
+//
+//                // ...
+//            }
+//
+//            @Override
+//            public void onChildRemoved(DataSnapshot dataSnapshot) {
+//                Log.d(TAG, "onChildRemoved:" + dataSnapshot.getKey());
+//
+//                // A comment has changed, use the key to determine if we are displaying this
+//                // comment and if so remove it.
+//                String commentKey = dataSnapshot.getKey();
+//
+//                // ...
+//            }
+//
+//            @Override
+//            public void onChildMoved(DataSnapshot dataSnapshot, String previousChildName) {
+//                Log.d(TAG, "onChildMoved:" + dataSnapshot.getKey());
+//
+//                // A comment has changed position, use the key to determine if we are
+//                // displaying this comment and if so move it.
+//                Comment movedComment = dataSnapshot.getValue(Comment.class);
+//                String commentKey = dataSnapshot.getKey();
+//
+//                // ...
+//            }
+//
+//            @Override
+//            public void onCancelled(DatabaseError databaseError) {
+//                Log.w(TAG, "postComments:onCancelled", databaseError.toException());
+//                Toast.makeText(mContext, "Failed to load comments.",
+//                        Toast.LENGTH_SHORT).show();
+//            }
+//        };
+//        ref.addChildEventListener(childEventListener);
+
+
+        // Last 100 posts, these are automatically the 100 most recent
+        // due to sorting by push() keys
+//        Query recentPostsQuery = databaseReference.child("posts")
+//                .limitToFirst(100);// Last 100 posts, these are automatically the 100 most recent
+//        // due to sorting by push() keys
+//        Query recentPostsQuery = databaseReference.child("posts")
+//                .limitToFirst(100);
     }
 
 

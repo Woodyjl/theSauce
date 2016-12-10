@@ -24,7 +24,11 @@
     <string name="action_settings">Settings</string>
     <string name="section_format">Hello World from section: %1$d</string>
 
+    <!--links related to firebase-->
+    <string name="firebase_storage_bucket_name">gs://thesauce2-56d66.appspot.com</string>
+
     <!-- Relating to the Fragments  -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="profile_fragment">Profile</string>
+    <string name="news_feed_fragment">News Feed</string>
 </resources>

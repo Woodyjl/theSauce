@@ -3,11 +3,14 @@ package com.carolinagold.thesauce;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
-import android.app.Fragment;
+//import android.app.Fragment;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ListView;
+import android.support.v4.app.Fragment;
+
+import java.util.List;
 
 
 /**
@@ -20,7 +23,7 @@ import android.widget.ListView;
  */
 public class NewFeedFragment extends Fragment {
 
-    ListView listView;
+    RecyclerView recyclerView;
 
 
 
@@ -33,10 +36,6 @@ public class NewFeedFragment extends Fragment {
 
     public static NewFeedFragment newInstance() {
         NewFeedFragment fragment = new NewFeedFragment();
-//        Bundle args = new Bundle();
-//        args.putString(ARG_PARAM1, param1);
-//        args.putString(ARG_PARAM2, param2);
-//        fragment.setArguments(args);
         return fragment;
     }
 
@@ -51,8 +50,10 @@ public class NewFeedFragment extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_new_feed, container, false);
 
-        listView = (ListView) view.findViewById(R.id.news_feed_fragment_list_view);
-        //NewsFeedAdaptor adaptor = NewFeedFragment(this, );
+        recyclerView = (RecyclerView) view.findViewById(R.id.news_feed_fragment_recycler_view);
+
+        NewsFeedAdaptor adapter = new NewsFeedAdaptor(getContext(), (List<Post>) getArguments().getSerializable("posts"));
+        recyclerView.setAdapter(adapter);
         return view;
     }
 

@@ -5,12 +5,12 @@
     android:background="#ffffff"
     tools:context="com.carolinagold.thesauce.NewFeedFragment">
 
-    <ListView
-        android:id="@+id/news_feed_fragment_list_view"
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/news_feed_fragment_recycler_view"
         android:layout_width="@dimen/news_feed_list_width"
         android:layout_height="match_parent"
         android:dividerHeight="5dp"
         android:alpha="0"
-        ></ListView>
+        ></android.support.v7.widget.RecyclerView>
 
 </LinearLayout>
