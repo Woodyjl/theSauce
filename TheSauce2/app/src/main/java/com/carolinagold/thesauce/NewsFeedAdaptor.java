@@ -33,6 +33,11 @@ public class NewsFeedAdaptor extends RecyclerView.Adapter<NewsFeedAdaptor.PostVi
         return context;
     }
 
+    public void updateFeedList(List<Post> list) {
+        posts = list;
+        notifyDataSetChanged();
+    }
+
     // Usually involves inflating a layout from XML and returning the holder
     @Override
     public NewsFeedAdaptor.PostViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -50,16 +55,20 @@ public class NewsFeedAdaptor extends RecyclerView.Adapter<NewsFeedAdaptor.PostVi
     // Involves populating data into the item through holder
     @Override
     public void onBindViewHolder(NewsFeedAdaptor.PostViewHolder viewHolder, int position) {
-        // Get the data model based on position
-        Post post = posts.get(position);
+        if (posts != null) {
+            // Get the data model based on position
+            Post post = posts.get(position);
 
-        // Set item views based on your views and data model
-        viewHolder.userProfilePicture = null;
-        viewHolder.userName = null;
-        viewHolder.location.setText(post.getLocation());
-        viewHolder.date.setText(post.getDate());
-        //viewHolder.imageView.setImageURI(Uri.parse(post.getImagePath()));
-        viewHolder.caption.setText(post.getCaption());
+            // Set item views based on your views and data model
+            //viewHolder.userProfilePicture = null;
+            viewHolder.userName.setText(post.getUserName());
+            viewHolder.location.setText(post.getLocation());
+            viewHolder.date.setText(post.getDate());
+            //viewHolder.imageView.setImageURI(Uri.parse(post.getImagePath()));
+            viewHolder.caption.setText(post.getCaption());
+        } else {
+            //Implement some default design
+        }
     }
 
     // Returns the total count of items in the list

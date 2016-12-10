@@ -28,7 +28,8 @@ public class Post extends Object implements Serializable {
 
     private final String firebase_storage_bucket_name = "gs://thesauce2-56d66.appspot.com";
 
-    private String userId;
+    private String userProfilePicturePath;
+    public String uId;
     private String userName;
     private String imagePath;
     private String date;
@@ -39,8 +40,8 @@ public class Post extends Object implements Serializable {
 
     }
 
-    public Post(@NonNull String userID, String userName, @NonNull String imagePath, String date, String location, String caption) {
-        this.userId = userID;
+    public Post(@NonNull String uId, String userName, @NonNull String imagePath, String date, String location, String caption) {
+        this.uId = uId;
         this.userName = userName;
         this.imagePath = imagePath;
         this.date = date;
@@ -48,7 +49,9 @@ public class Post extends Object implements Serializable {
         this.caption = caption;
     }
 
-    public String getUserId() {return userId;}
+    public String getUserProfilePicturePath() {return userProfilePicturePath;}
+
+    public String getUserId() {return uId;}
 
     public String getUserName() {return userName;}
 
@@ -66,7 +69,7 @@ public class Post extends Object implements Serializable {
         // Create a storage reference from our app
         FirebaseStorage storage = FirebaseStorage.getInstance();
         StorageReference storageRef = storage.getReferenceFromUrl(firebase_storage_bucket_name);
-        storageRef = storageRef.child("Posts").child(userId);
+        storageRef = storageRef.child("Posts").child(uId);
 
         try {
             Bitmap bitmap = MediaStore.Images.Media.getBitmap(context.getContentResolver(), Uri.parse(imagePath));
@@ -90,14 +93,14 @@ public class Post extends Object implements Serializable {
                     DatabaseReference myRef = database.getReference("Post");
 
                     // Creates a post in the real time database with paths to the image file in storage
-                    String key = myRef.child(userId).push().getKey();
-                    myRef.child(userId).child(key).child("userProfilePicturePath").setValue("Hello, World!");
-                    myRef.child(userId).child(key).child("userName").setValue(userName);
-                    myRef.child(userId).child(key).child("uId").setValue(userId);
-                    myRef.child(userId).child(key).child("location").setValue(location);
-                    myRef.child(userId).child(key).child("caption").setValue(caption);
-                    myRef.child(userId).child(key).child("date").setValue(date);
-                    myRef.child(userId).child(key).child("imagePath").setValue(downloadUrl.toString());
+                    String key = myRef.child(uId).push().getKey();
+                    myRef.child(uId).child(key).child("userProfilePicturePath").setValue("Hello, World!");
+                    myRef.child(uId).child(key).child("userName").setValue(userName);
+                    myRef.child(uId).child(key).child("uId").setValue(uId);
+                    myRef.child(uId).child(key).child("location").setValue(location);
+                    myRef.child(uId).child(key).child("caption").setValue(caption);
+                    myRef.child(uId).child(key).child("date").setValue(date);
+                    myRef.child(uId).child(key).child("imagePath").setValue(downloadUrl.toString());
                 }
             });
         } catch (Exception e) {

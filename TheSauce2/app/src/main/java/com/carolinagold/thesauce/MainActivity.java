@@ -1,10 +1,14 @@
 package com.carolinagold.thesauce;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -23,6 +27,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -35,13 +40,14 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.GenericTypeIndicator;
 import com.google.firebase.database.ValueEventListener;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity implements ProfileFragment.OnFragmentInteractionListener {
+public class MainActivity extends AppCompatActivity implements OnFragmentInteractionListener {
 
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide
@@ -68,6 +74,7 @@ public class MainActivity extends AppCompatActivity implements ProfileFragment.O
     //keeps track of user logging in or out
     private FirebaseAuth.AuthStateListener mAuthListener;
     private FirebaseUser user;
+    private ProgressBar progressBar;
 
 
     @Override
@@ -99,7 +106,7 @@ public class MainActivity extends AppCompatActivity implements ProfileFragment.O
 
         };
 
-
+        progressBar = (ProgressBar) findViewById(R.id.main_activity_progress_bar);
 
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -125,7 +132,7 @@ public class MainActivity extends AppCompatActivity implements ProfileFragment.O
                         .setAction("Action", null).show();
 
                 //Create a new post
-                getLatestPost();
+
             }
         });
 
@@ -158,36 +165,53 @@ public class MainActivity extends AppCompatActivity implements ProfileFragment.O
     private void setupViewPager(ViewPager viewPager) {
         SectionsPagerAdapter adapter = new SectionsPagerAdapter(getSupportFragmentManager());
 
+
         Fragment fragment = new NewFeedFragment();
+        getLatestPost((NewsFeedFetchCallBack) fragment);
 //        Bundle args = new Bundle();
 //        args.putSerializable("posts", (Serializable) getLatestPost());
 //        fragment.setArguments(args);
-//        adapter.addFragment(fragment, getString(R.string.news_feed_fragment));
+        adapter.addFragment(fragment, getString(R.string.news_feed_fragment));
 
         fragment = new ProfileFragment();
         adapter.addFragment(fragment,getString(R.string.profile_fragment));
         viewPager.setAdapter(adapter);
     }
 
-    private List<Post> getLatestPost() {
+    boolean progressShown = false;
+
+    private void getLatestPost(final NewsFeedFetchCallBack delegate) {
         FirebaseDatabase dbRef = FirebaseDatabase.getInstance();
         DatabaseReference myRef = dbRef.getReference("Post");
+
+        showProgress(true);
 
         myRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                int counter = 0;
-                System.out.println(dataSnapshot.getValue(Post.class));
-                System.out.println("\ncounter :" + ++counter);
+
+                List<Post> listOfPosts = new ArrayList<Post>();
+
+                for (DataSnapshot postByUser : dataSnapshot.getChildren()) {
+                    System.out.println(postByUser);
+                    for (DataSnapshot post : postByUser.getChildren()) {
+                        //System.out.println("value: " + post.getValue(Post.class));
+                        listOfPosts.add(post.getValue(Post.class));
+                    }
+
+                    //System.out.println("child: " + post.getChildren());
+                }
+                showProgress(false);
+                while (!delegate.ready()) {}
+                delegate.updateFeed(listOfPosts);
             }
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
                 Log.i(Logs.POINT_OF_INTEREST, "Failed retrieving data from firebase from method: getLatestPost");
+                showProgress(false);
             }
         });
-
-        return null;
 
 //        ChildEventListener childEventListener = new ChildEventListener() {
 //            @Override
@@ -283,6 +307,43 @@ public class MainActivity extends AppCompatActivity implements ProfileFragment.O
     }
 
     /**
+     * Shows the progress UI and hides the login form.
+     */
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
+    private void showProgress(final boolean show) {
+        // On Honeycomb MR2 we have the ViewPropertyAnimator APIs, which allow
+        // for very easy animations. If available, use these APIs to fade-in
+        // the progress spinner.
+        progressShown = show;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR2) {
+            int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
+
+            mViewPager.setVisibility(show ? View.GONE : View.VISIBLE);
+            mViewPager.animate().setDuration(shortAnimTime).alpha(
+                    show ? 0 : 1).setListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    mViewPager.setVisibility(show ? View.GONE : View.VISIBLE);
+                }
+            });
+
+            progressBar.setVisibility(show ? View.VISIBLE : View.GONE);
+            progressBar.animate().setDuration(shortAnimTime).alpha(
+                    show ? 1 : 0).setListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    progressBar.setVisibility(show ? View.VISIBLE : View.GONE);
+                }
+            });
+        } else {
+            // The ViewPropertyAnimator APIs are not available, so simply show
+            // and hide the relevant UI components.
+            progressBar.setVisibility(show ? View.VISIBLE : View.GONE);
+            mViewPager.setVisibility(show ? View.GONE : View.VISIBLE);
+        }
+    }
+
+    /**
      * A {@link FragmentPagerAdapter} that returns a fragment corresponding to
      * one of the sections/tabs/pages.
      */
@@ -314,5 +375,11 @@ public class MainActivity extends AppCompatActivity implements ProfileFragment.O
         public CharSequence getPageTitle(int position) {
             return mFragmentTitleList.get(position);
         }
+    }
+
+    public interface NewsFeedFetchCallBack {
+        public void updateFeed(List<Post> list);
+
+        public boolean ready();
     }
 }

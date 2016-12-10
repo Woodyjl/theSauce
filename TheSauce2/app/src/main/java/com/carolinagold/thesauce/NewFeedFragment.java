@@ -4,12 +4,15 @@ import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
 //import android.app.Fragment;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.support.v4.app.Fragment;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -21,7 +24,7 @@ import java.util.List;
  * Use the {@link NewFeedFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class NewFeedFragment extends Fragment {
+public class NewFeedFragment extends Fragment implements MainActivity.NewsFeedFetchCallBack{
 
     RecyclerView recyclerView;
 
@@ -52,10 +55,27 @@ public class NewFeedFragment extends Fragment {
 
         recyclerView = (RecyclerView) view.findViewById(R.id.news_feed_fragment_recycler_view);
 
-        NewsFeedAdaptor adapter = new NewsFeedAdaptor(getContext(), (List<Post>) getArguments().getSerializable("posts"));
+        List<Post> theList = new ArrayList<Post>();
+
+        for (int i = 0; i < 10; i++) {
+            theList.add(new Post("n " + i, " HelloWorld", " HelloWorld"," HelloWorld"," HelloWorld"," HelloWorld"));
+        }
+
+        NewsFeedAdaptor adapter = new NewsFeedAdaptor(getContext(), theList);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         recyclerView.setAdapter(adapter);
+        ready = true;
         return view;
     }
+
+    boolean ready = false;
+
+    public void updateFeed(List<Post> list) {
+        ((NewsFeedAdaptor) recyclerView.getAdapter()).updateFeedList(list);
+    }
+
+    @Override
+    public boolean ready() {return ready;}
 
     // TODO: Rename method, update argument and hook method into UI event
     public void onButtonPressed(Uri uri) {
@@ -81,18 +101,4 @@ public class NewFeedFragment extends Fragment {
         mListener = null;
     }
 
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
-     */
-    public interface OnFragmentInteractionListener {
-        // TODO: Update argument type and name
-        void onFragmentInteraction(Uri uri);
-    }
 }
