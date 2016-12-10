@@ -1,0 +1,13 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+int main(){
+ int data[] = {8,7,6,5,4,3,2};
+ int *bean;
+
+ bean = &data[3];
+ printf("%d %d\n",bean[data[6]],&data[5]-bean); 
+ return(0);
+
+
+}

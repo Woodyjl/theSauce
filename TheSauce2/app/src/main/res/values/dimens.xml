@@ -4,4 +4,10 @@
     <dimen name="activity_vertical_margin">16dp</dimen>
     <dimen name="fab_margin">16dp</dimen>
     <dimen name="appbar_padding_top">8dp</dimen>
+    <dimen name="text_margin">16dp</dimen>
+
+    <!--Dimensions relating to newsfeed posts-->
+    <dimen name="news_feed_list_width">300dp</dimen>
+    <dimen name="news_feed_post_layout_profile_picture_dimen">25dp</dimen>
+
 </resources>

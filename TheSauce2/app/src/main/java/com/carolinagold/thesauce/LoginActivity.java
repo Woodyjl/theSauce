@@ -3,6 +3,9 @@ package com.carolinagold.thesauce;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
+import android.app.Activity;
+import android.app.Dialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.support.annotation.NonNull;
@@ -32,6 +35,8 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
@@ -49,17 +54,15 @@ import static android.Manifest.permission.READ_CONTACTS;
 public class LoginActivity extends AppCompatActivity {
 
     /**
-     * Id to identity READ_CONTACTS permission request.
-     */
-    private static final int REQUEST_READ_CONTACTS = 0;
-
-    /**
      * A dummy authentication store containing known user names and passwords.
+     * private final String loginName = "johndoe@gmail.com";
+       private final String loginPass = "123123";
      * TODO: remove after connecting to a real authentication system.
      */
     private static final String[] DUMMY_CREDENTIALS = new String[]{
-            "foo@example.com:hello", "bar@example.com:world"
+            "johndoe@gmail.com", "123123"
     };
+    private static final int GOOGLE_PLAY_SERVICE_UPDATE_CODE = 0;
     /**
      * Keep track of the login task to ensure we can cancel it if requested.
      */
@@ -84,7 +87,7 @@ public class LoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        //gets a Firebass Authenticator
+        //gets a Firebase Authenticator
         mAuth = FirebaseAuth.getInstance();
         //tracks when user signs in or out
         mAuthListener = new FirebaseAuth.AuthStateListener() {
@@ -92,9 +95,11 @@ public class LoginActivity extends AppCompatActivity {
                 //gets the user to see if he is signed in or not
                 FirebaseUser user = firebaseAuth.getCurrentUser();
                 if(user != null) {
-                    startActivity(new Intent(LoginActivity.this, MainActivity.class));
+                    //startActivity(new Intent(LoginActivity.this, MainActivity.class));
+
                     //User is signed in
                     Log.d(TAG, "onAuthStateChanged:signed_in:" + user.getUid());
+                    finish();
                 }
                 else {
                     //user is signed out
@@ -121,6 +126,47 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
 
+        if (true || checkPlayServiceVersion()) {
+            setButtons();
+        }
+
+        mLoginFormView = findViewById(R.id.login_form);
+        mProgressView = findViewById(R.id.login_progress);
+
+        //Delete before launch
+        mEmailView.setText(DUMMY_CREDENTIALS[0]);
+        mPasswordView.setText(DUMMY_CREDENTIALS[1]);
+        //attemptLogin();
+
+
+
+    }
+
+    boolean checkPlayServiceVersion() {
+        final Activity activity = this;
+        final int googlePlayServicesCheck = GooglePlayServicesUtil.isGooglePlayServicesAvailable(activity);
+        switch (googlePlayServicesCheck) {
+            case ConnectionResult.SUCCESS:
+                return true;
+            case ConnectionResult.SERVICE_DISABLED:
+            case ConnectionResult.SERVICE_INVALID:
+            case ConnectionResult.SERVICE_MISSING:
+            case ConnectionResult.SERVICE_VERSION_UPDATE_REQUIRED:
+                Dialog dialog = GooglePlayServicesUtil.getErrorDialog(googlePlayServicesCheck, activity, GOOGLE_PLAY_SERVICE_UPDATE_CODE);
+                dialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+                    @Override
+                    public void onCancel(DialogInterface dialogInterface) {
+                        activity.getParent().finish();
+                    }
+                });
+                dialog.show();
+                break;
+
+        }
+        return false;
+    }
+
+    void setButtons() {
         Button signInButton = (Button) findViewById(R.id.email_login_button);
         signInButton.setOnClickListener(new OnClickListener() {
             @Override
@@ -134,16 +180,25 @@ public class LoginActivity extends AppCompatActivity {
         signUpButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
-                 startActivity(new Intent(LoginActivity.this, SignUpActivity.class));
+                startActivity(new Intent(LoginActivity.this, SignUpActivity.class));
             }
         });
+    }
 
-        mLoginFormView = findViewById(R.id.login_form);
-        mProgressView = findViewById(R.id.login_progress);
-
-
-
-
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        switch (requestCode) {
+            case GOOGLE_PLAY_SERVICE_UPDATE_CODE:
+                if (resultCode == RESULT_CANCELED) {
+                    Toast.makeText(this, "Google Play Services must be installed.",
+                            Toast.LENGTH_SHORT).show();
+                    // terminate application with onActivityResult
+                } else {
+                    setButtons();
+                }
+                return;
+        }
+        super.onActivityResult(requestCode, resultCode, data);
     }
 
     //assigns firebase login state listener to our Authenticator
@@ -214,8 +269,10 @@ public class LoginActivity extends AppCompatActivity {
         if (cancel) {
             // There was an error; don't attempt login and focus the first
             // form field with an error.
+            System.out.print("-----------------------------------------------------");
             focusView.requestFocus();
         } else {
+            System.out.print("----------------------cancel: false-------------------------------");
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
             showProgress(true);
@@ -292,6 +349,7 @@ public class LoginActivity extends AppCompatActivity {
         UserLoginTask(String email, String password) {
             mEmail = email;
             mPassword = password;
+            doInBackground();
         }
 
         @Override
@@ -311,31 +369,12 @@ public class LoginActivity extends AppCompatActivity {
                             // signed in user can be handled in the listener.
                             if (!task.isSuccessful()) {
                                 Log.w(TAG, "signInWithEmail", task.getException());
+
                                 Toast.makeText(LoginActivity.this, "Authentication failed.",
                                         Toast.LENGTH_SHORT).show();
                             }
                         }
                     });
-
-
-            try {
-
-                Thread.sleep(2000);
-            }
-            //simulate network access
-            catch (InterruptedException e) {
-                return false;
-            }
-
-            for (String credential : DUMMY_CREDENTIALS) {
-                String[] pieces = credential.split(":");
-                if (pieces[0].equals(mEmail)) {
-                    // Account exists, return true if the password matches.
-                    return pieces[1].equals(mPassword);
-                }
-            }
-
-            // TODO: register the new account here.
             return true;
         }
 

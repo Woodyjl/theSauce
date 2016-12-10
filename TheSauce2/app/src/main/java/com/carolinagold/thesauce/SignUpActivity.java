@@ -189,7 +189,7 @@ public class SignUpActivity extends AppCompatActivity {
 
             // Check for a valid password, if the user entered one.
             //also check if both passwords are equal
-            if (!TextUtils.isEmpty(password) || !isPasswordValid(password) || password.equals(passwordConfirm)) {
+            if (TextUtils.isEmpty(password) || !isPasswordValid(password) || !password.equals(passwordConfirm)) {
                 mPasswordView.setError(getString(R.string.error_invalid_password));
                 focusView = mPasswordView;
                 cancel = true;
