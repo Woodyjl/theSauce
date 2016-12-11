@@ -1,65 +1,62 @@
 package com.carolinagold.thesauce;
 
 import android.content.Context;
+import android.media.ImageWriter;
 import android.net.Uri;
 import android.os.Bundle;
-//import android.app.Fragment;
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.support.v4.app.Fragment;
 import android.widget.Button;
+import android.widget.GridLayout;
+import android.widget.ImageView;
+import android.widget.TextView;
+
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+import com.squareup.picasso.Picasso;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
-/**
- * A simple {@link Fragment} subclass.
- * Activities that contain this fragment must implement the
- * {@link ProfileFragment.OnFragmentInteractionListener} interface
- * to handle interaction events.
- * Use the {@link ProfileFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
+
 public class ProfileFragment extends Fragment {
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
 
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
+    RecyclerView recyclerView;
+
+    ImageView imageView;
+    TextView textView;
+
+    FirebaseUser user;
 
     private OnFragmentInteractionListener mListener;
 
     public ProfileFragment() {
         // Required empty public constructor
+
     }
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment ProfileFragment.
-     */
-    // TODO: Rename and change types and number of parameters
+
     public static ProfileFragment newInstance(String param1, String param2) {
         ProfileFragment fragment = new ProfileFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
+
         return fragment;
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
+
     }
 
     @Override
@@ -67,19 +64,69 @@ public class ProfileFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View rootView = inflater.inflate(R.layout.fragment_profile, container, false);
-        //sign out button
-        Button signOutButton = (Button) rootView.findViewById(R.id.email_logout_button);
-        signOutButton.setOnClickListener(new View.OnClickListener() {
+
+        imageView = (ImageView) rootView.findViewById(R.id.profile_fragment_profile_image);
+        textView = (TextView) rootView.findViewById(R.id.profile_fragment_profile_name);
+        setUpTopView();
+
+        recyclerView = (RecyclerView) rootView.findViewById(R.id.profile_fragment_recycler_grid);
+
+        List<Post> theList = new ArrayList<Post>();
+
+        for (int i = 0; i < 10; i++) {
+            theList.add(new Post("n " + i, " HelloWorld", " HelloWorld"," HelloWorld"," HelloWorld"," HelloWorld"));
+        }
+
+        recyclerView.setLayoutManager(new GridLayoutManager(getActivity(), 3, GridLayout.VERTICAL, false) {
             @Override
-            public void onClick(View view) {
-//                    user = mAuth.getCurrentUser();
-//                    if(user != null) {
-//                        mAuth.signOut();
-//                    }
+            public boolean canScrollVertically() {
+                return false;
+            }
+        });
+        ProfileAdapter adapter = new ProfileAdapter(getContext(), theList);
+        recyclerView.setAdapter(adapter);
+
+        user = ((MainActivity) getActivity()).user;
+        getAllProfilePost();
+
+        return rootView;
+    }
+
+
+    private void getAllProfilePost() {
+        FirebaseDatabase dbRef = FirebaseDatabase.getInstance();
+        DatabaseReference myRef = dbRef.getReference("Post").child(user.getUid());
+
+        ((MainActivity) getActivity()).showProgress(true);
+        final ProfileAdapter adaptor = (ProfileAdapter) recyclerView.getAdapter();
+        myRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+
+                List<Post> listOfPosts = new ArrayList<Post>();
+
+                for (DataSnapshot postByUser : dataSnapshot.getChildren()) {
+                    System.out.println(postByUser);
+
+                    listOfPosts.add(postByUser.getValue(Post.class));
+
+                }
+                ((MainActivity) getActivity()).showProgress(false);
+                adaptor.updateProfileGallery(listOfPosts);
+                adaptor.notifyDataSetChanged();
             }
 
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.i(Logs.POINT_OF_INTEREST, "Failed retrieving data from firebase from method: getLatestPost");
+                ((MainActivity) getActivity()).showProgress(false);
+            }
         });
-        return rootView;
+    }
+
+    private void setUpTopView() {
+        textView.setText(user.getDisplayName());
+        //Picasso.with(getActivity()).load(user.getPhotoUrl())
     }
 
     // TODO: Rename method, update argument and hook method into UI event

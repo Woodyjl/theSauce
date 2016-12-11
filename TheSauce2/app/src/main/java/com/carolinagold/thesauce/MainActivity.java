@@ -3,9 +3,6 @@ package com.carolinagold.thesauce;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
-import android.app.Activity;
-import android.app.Dialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
@@ -25,10 +22,8 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.Button;
+
 import android.widget.ProgressBar;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -40,10 +35,9 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.GenericTypeIndicator;
 import com.google.firebase.database.ValueEventListener;
 
-import java.io.Serializable;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -75,7 +69,7 @@ public class MainActivity extends AppCompatActivity implements OnFragmentInterac
     private FirebaseAuth mAuth;
     //keeps track of user logging in or out
     private FirebaseAuth.AuthStateListener mAuthListener;
-    private FirebaseUser user;
+    public FirebaseUser user;
     private ProgressBar progressBar;
 
     NewFeedFragment newFeedFragment;
@@ -210,8 +204,6 @@ public class MainActivity extends AppCompatActivity implements OnFragmentInterac
         viewPager.setAdapter(adapter);
     }
 
-    boolean progressShown = false;
-
 
 
 //        ChildEventListener childEventListener = new ChildEventListener() {
@@ -294,9 +286,19 @@ public class MainActivity extends AppCompatActivity implements OnFragmentInterac
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
+        switch (id) {
+            case R.id.action_settings:
+                Toast.makeText(this, "Works", Toast.LENGTH_LONG);
+                return true;
+            case R.id.log_out:
+
+                user = mAuth.getCurrentUser();
+                if(user != null)
+                    mAuth.signOut();
+
+                return true;
+            default:
+                break;
         }
 
         return super.onOptionsItemSelected(item);
@@ -315,7 +317,6 @@ public class MainActivity extends AppCompatActivity implements OnFragmentInterac
         // On Honeycomb MR2 we have the ViewPropertyAnimator APIs, which allow
         // for very easy animations. If available, use these APIs to fade-in
         // the progress spinner.
-        progressShown = show;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR2) {
             int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
 

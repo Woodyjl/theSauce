@@ -42,7 +42,9 @@
     <ImageView
         android:id="@+id/news_feed_post_layout_image"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/news_feed_list_width" />
+        android:layout_height="wrap_content"
+        android:scaleType="fitCenter"
+        android:adjustViewBounds="true" />
 
     <TextView
         android:id="@+id/news_feed_post_layout_caption"

@@ -8,17 +8,15 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-
 import com.squareup.picasso.Picasso;
 
 import java.util.List;
-import java.util.Observable;
 
 /**
- * Created by woodyjean-louis on 12/9/16.
+ * Created by woodyjean-louis on 12/10/16.
  */
 
-public class NewsFeedAdaptor extends RecyclerView.Adapter<NewsFeedAdaptor.PostViewHolder> {
+public class ProfileAdapter extends RecyclerView.Adapter<ProfileAdapter.ViewHolder> {
 
     // Store the context for easy access
     private Context context;
@@ -26,7 +24,7 @@ public class NewsFeedAdaptor extends RecyclerView.Adapter<NewsFeedAdaptor.PostVi
     private List<Post> posts;
 
     // Pass in the contact array into the constructor
-    public NewsFeedAdaptor(Context context, final List<Post> posts) {
+    public ProfileAdapter(Context context, final List<Post> posts) {
         this.context = context;
         this.posts = posts;
 
@@ -35,7 +33,7 @@ public class NewsFeedAdaptor extends RecyclerView.Adapter<NewsFeedAdaptor.PostVi
             public void onChanged() {
                 super.onChanged();
                 for (int i = 0; i < posts.size(); i++)
-                notifyItemChanged(i);
+                    notifyItemChanged(i);
             }
         });
     }
@@ -45,38 +43,34 @@ public class NewsFeedAdaptor extends RecyclerView.Adapter<NewsFeedAdaptor.PostVi
         return context;
     }
 
-    public void updateFeedList(List<Post> list) {
+    public void updateProfileGallery(List<Post> list) {
         posts = list;
     }
 
     // Usually involves inflating a layout from XML and returning the holder
     @Override
-    public NewsFeedAdaptor.PostViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public ProfileAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         Context context = parent.getContext();
         LayoutInflater inflater = LayoutInflater.from(context);
 
         // Inflate the custom layout
-        View postView = inflater.inflate(R.layout.news_feed_post_layout, parent, false);
+        View postView = inflater.inflate(R.layout.profile_gallery_item, parent, false);
 
         // Return a new holder instance
-        PostViewHolder viewHolder = new PostViewHolder(postView);
+        ProfileAdapter.ViewHolder viewHolder = new ProfileAdapter.ViewHolder(postView);
         return viewHolder;
     }
 
     // Involves populating data into the item through holder
     @Override
-    public void onBindViewHolder(NewsFeedAdaptor.PostViewHolder viewHolder, int position) {
+    public void onBindViewHolder(ProfileAdapter.ViewHolder viewHolder, int position) {
         if (posts != null) {
             // Get the data model based on position
             Post post = posts.get(position);
 
             // Set item views based on your views and data model
-            Picasso.with(context).load(post.getUserProfilePicturePath()).into(viewHolder.userProfilePicture);
-            viewHolder.userName.setText(post.getUserName());
-            viewHolder.location.setText(post.getLocation());
-            viewHolder.date.setText(post.getDate());
             Picasso.with(context).load(post.getImagePath()).into(viewHolder.imageView);
-            viewHolder.caption.setText(post.getCaption());
+
         } else {
             //Implement some default design
         }
@@ -90,29 +84,21 @@ public class NewsFeedAdaptor extends RecyclerView.Adapter<NewsFeedAdaptor.PostVi
 
     // Provide a direct reference to each of the views within a data item
     // Used to cache the views within the item layout for fast access
-    public static class PostViewHolder extends RecyclerView.ViewHolder {
+    public static class ViewHolder extends RecyclerView.ViewHolder {
         // Your holder should contain a member variable
         // for any view that will be set as you render a row
-        public ImageView userProfilePicture;
-        TextView userName;
-        TextView location;
-        TextView date;
         ImageView imageView;
-        TextView caption;
 
         // We also create a constructor that accepts the entire item row
         // and does the view lookups to find each subview
-        public PostViewHolder(View itemView) {
+        public ViewHolder(View itemView) {
             // Stores the itemView in a public final member variable that can be used
             // to access the context from any ViewHolder instance.
             super(itemView);
 
-            userProfilePicture = (ImageView) itemView.findViewById(R.id.news_feed_post_layout_profile_picture);
-            userName = (TextView) itemView.findViewById(R.id.news_feed_post_layout_profile_name);
-            location = (TextView) itemView.findViewById(R.id.news_feed_post_layout_location);
-            date = (TextView) itemView.findViewById(R.id.news_feed_post_layout_date);
-            imageView = (ImageView) itemView.findViewById(R.id.news_feed_post_layout_image);
-            caption = (TextView) itemView.findViewById(R.id.news_feed_post_layout_caption);
+            imageView = (ImageView) itemView.findViewById(R.id.profile_gallery_item);
+
         }
     }
+
 }
