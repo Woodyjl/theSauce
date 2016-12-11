@@ -62,6 +62,8 @@ public class MainActivity extends AppCompatActivity implements OnFragmentInterac
     /**
      * The {@link ViewPager} that will host the section contents.
      */
+    private static final int POST_CREATE_ACTIVITY = 1;
+
     private ViewPager mViewPager;
 
     private Toolbar toolbar;
@@ -75,6 +77,10 @@ public class MainActivity extends AppCompatActivity implements OnFragmentInterac
     private FirebaseAuth.AuthStateListener mAuthListener;
     private FirebaseUser user;
     private ProgressBar progressBar;
+
+    NewFeedFragment newFeedFragment;
+    ProfileFragment profileFragment;
+
 
 
     @Override
@@ -128,13 +134,40 @@ public class MainActivity extends AppCompatActivity implements OnFragmentInterac
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+
+                String uId = user.getUid();
+                String displayName = user.getDisplayName();
+
+
+
+                Intent postCreateActivity;
+                postCreateActivity = new Intent(MainActivity.this,PostCreator.class);
+                postCreateActivity.putExtra("uId", uId);
+                postCreateActivity.putExtra("displayName", displayName);
+                startActivityForResult(postCreateActivity, POST_CREATE_ACTIVITY);
+
+
+
                 Snackbar.make(view, "Cool! you want to create a new post", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
+
 
                 //Create a new post
 
             }
         });
+
+    }
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        switch (requestCode) {
+            case POST_CREATE_ACTIVITY:
+                if(resultCode == RESULT_OK) {
+                    if(newFeedFragment != null) {
+                        newFeedFragment.getLatestPost();
+                    }
+
+                }
+        }
 
     }
 
@@ -166,14 +199,14 @@ public class MainActivity extends AppCompatActivity implements OnFragmentInterac
         SectionsPagerAdapter adapter = new SectionsPagerAdapter(getSupportFragmentManager());
 
 
-        Fragment fragment = new NewFeedFragment();
+          newFeedFragment = new NewFeedFragment();
 //        Bundle args = new Bundle();
 //        args.putSerializable("posts", (Serializable) getLatestPost());
 //        fragment.setArguments(args);
-        adapter.addFragment(fragment, getString(R.string.news_feed_fragment));
+        adapter.addFragment(newFeedFragment, getString(R.string.news_feed_fragment));
 
-        fragment = new ProfileFragment();
-        adapter.addFragment(fragment,getString(R.string.profile_fragment));
+        profileFragment = new ProfileFragment();
+        adapter.addFragment(profileFragment,getString(R.string.profile_fragment));
         viewPager.setAdapter(adapter);
     }
 

@@ -10,4 +10,15 @@
     <dimen name="news_feed_list_width">300dp</dimen>
     <dimen name="news_feed_post_layout_profile_picture_dimen">25dp</dimen>
 
+    <!--Dimensions relating to createPost-->
+
+    <integer name="imageview_picture_weight">50</integer>
+    <integer name="edittext_caption_weight">25</integer>
+    <integer name="textview_location_weight">25</integer>
+    <dimen name="post_button_size">80dp</dimen>
+
+    <!--Dimensions relating to location -->
+    <integer name="time_between_location_updates_ms">2000</integer>
+    <integer name="threshold_for_last_location_ms">10000</integer>
+
 </resources>

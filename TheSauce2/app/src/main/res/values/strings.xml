@@ -31,4 +31,17 @@
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="profile_fragment">Profile</string>
     <string name="news_feed_fragment">News Feed</string>
+
+    <string name="dummyProfilePicDownloadUrl">https://firebasestorage.googleapis.com/v0/b/thesauce2-56d66.appspot.com/o/DummyPicture%2FdummyProfilePicture.png?alt=media&amp;token=5d3cb4af-95c5-4e06-846d-e628ceefb325</string>
+
+    <!-- Relating to the post creator -->
+    <string name="choose_gallery">Gallery</string>
+    <string name="choose_camera">Camera</string>
+    <string name="post_button">Post</string>
+    <string name="no_geocoder_availible">no geocoder available</string>
+    <string name="service_not_available">service not available</string>
+    <string name="invalid_lat_long_used">invalid lat long used</string>
+    <string name="no_address_found">no address found</string>
+    <string name="address_found">address found</string>
+
 </resources>

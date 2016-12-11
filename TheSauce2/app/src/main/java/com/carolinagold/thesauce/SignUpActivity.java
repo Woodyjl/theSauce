@@ -27,6 +27,10 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
 import java.util.List;
 
@@ -106,7 +110,16 @@ public class SignUpActivity extends AppCompatActivity {
                                     }
                                 });
 
+
                         //go to main activity now that user has account
+                        FirebaseStorage storage = FirebaseStorage.getInstance();
+                        StorageReference storageRef = storage.getReferenceFromUrl(getResources().getString(R.string.firebase_storage_bucket_name));
+
+                        String uId = user.getUid();
+                        FirebaseDatabase database = FirebaseDatabase.getInstance();
+                        DatabaseReference myRef = database.getReference("userProfileInfo");
+                        myRef.child(uId).child("userDisplayPicturePath").setValue(getResources().getString(R.string.dummyProfilePicDownloadUrl));
+
                         startActivity(new Intent(SignUpActivity.this, MainActivity.class));
                         Log.d(TAG, "onAuthStateChanged:signed_in:" + user.getUid());
                     } else {
@@ -319,16 +332,6 @@ public class SignUpActivity extends AppCompatActivity {
                                 }
                             }
                         });
-
-
-                try {
-
-                    Thread.sleep(2000);
-                }
-                //simulate network access
-                catch (InterruptedException e) {
-                    return false;
-                }
 
                 for (String credential : DUMMY_CREDENTIALS) {
                     String[] pieces = credential.split(":");

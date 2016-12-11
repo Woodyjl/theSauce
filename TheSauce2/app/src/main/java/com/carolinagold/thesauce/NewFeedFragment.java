@@ -65,7 +65,7 @@ public class NewFeedFragment extends Fragment {
         return view;
     }
 
-    private void getLatestPost() {
+    public void getLatestPost() {
         FirebaseDatabase dbRef = FirebaseDatabase.getInstance();
         DatabaseReference myRef = dbRef.getReference("Post");
 
