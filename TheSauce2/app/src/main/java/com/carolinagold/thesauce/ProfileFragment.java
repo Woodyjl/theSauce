@@ -67,24 +67,12 @@ public class ProfileFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View rootView = inflater.inflate(R.layout.fragment_profile, container, false);
-        user = ((MainActivity) getActivity()).user;
+        user = ((MainActivity) getActivity()).getUser();
         imageView = (ImageView) rootView.findViewById(R.id.profile_fragment_profile_image);
         textView = (TextView) rootView.findViewById(R.id.profile_fragment_profile_name);
         setUpTopView();
 
         recyclerView = (RecyclerView) rootView.findViewById(R.id.profile_fragment_recycler_grid);
-
-        scrollView = (ScrollView) rootView.findViewById(R.id.profile_fragment_scroll_view);
-
-        scrollView.setOnScrollChangeListener(new View.OnScrollChangeListener() {
-            @Override
-            public void onScrollChange(View view, int scrollX, int scrollY, int oldScrollX, int oldScrollY) {
-
-                if ((scrollY <= 20 && oldScrollY <=20) || (scrollY <= 20 && oldScrollY >= 20)) {
-                    recyclerView.smoothScrollToPosition(scrollY);
-                }
-            }
-        });
 
         List<Post> theList = new ArrayList<Post>();
 
@@ -95,17 +83,6 @@ public class ProfileFragment extends Fragment {
             }
         });
 
-        recyclerView.setOnScrollChangeListener(new View.OnScrollChangeListener() {
-            @Override
-            public void onScrollChange(View view, int scrollX, int scrollY, int oldScrollX, int oldScrollY) {
-
-                Log.i(Logs.POINT_OF_INTEREST, "y: " + scrollY + " oldy :" + oldScrollY);
-
-                if ((scrollY <= 20 && oldScrollY <= 20) || (scrollY <= 20 && oldScrollY >= 20)) {
-                    scrollView.smoothScrollTo(0,scrollY);
-                }
-            }
-        });
         ProfileAdapter adapter = new ProfileAdapter(getContext(), theList);
         recyclerView.setAdapter(adapter);
 
@@ -150,8 +127,8 @@ public class ProfileFragment extends Fragment {
     }
 
     private void setUpTopView() {
-        //textView.setText(user.getDisplayName());
-        //Picasso.with(getActivity()).load(user.getPhotoUrl()).into(imageView);
+        textView.setText(user.getDisplayName());
+        Picasso.with(getActivity()).load(user.getPhotoUrl()).into(imageView);
     }
 
     // TODO: Rename method, update argument and hook method into UI event
