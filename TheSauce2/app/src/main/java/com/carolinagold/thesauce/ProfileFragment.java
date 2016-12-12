@@ -4,6 +4,7 @@ import android.content.Context;
 import android.media.ImageWriter;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -14,6 +15,7 @@ import android.support.v4.app.Fragment;
 import android.widget.Button;
 import android.widget.GridLayout;
 import android.widget.ImageView;
+import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.google.firebase.auth.FirebaseAuth;
@@ -36,6 +38,7 @@ public class ProfileFragment extends Fragment {
 
     ImageView imageView;
     TextView textView;
+    ScrollView scrollView;
 
     FirebaseUser user;
 
@@ -64,29 +67,48 @@ public class ProfileFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View rootView = inflater.inflate(R.layout.fragment_profile, container, false);
-
+        user = ((MainActivity) getActivity()).user;
         imageView = (ImageView) rootView.findViewById(R.id.profile_fragment_profile_image);
         textView = (TextView) rootView.findViewById(R.id.profile_fragment_profile_name);
         setUpTopView();
 
         recyclerView = (RecyclerView) rootView.findViewById(R.id.profile_fragment_recycler_grid);
 
-        List<Post> theList = new ArrayList<Post>();
+        scrollView = (ScrollView) rootView.findViewById(R.id.profile_fragment_scroll_view);
 
-        for (int i = 0; i < 10; i++) {
-            theList.add(new Post("n " + i, " HelloWorld", " HelloWorld"," HelloWorld"," HelloWorld"," HelloWorld"));
-        }
+        scrollView.setOnScrollChangeListener(new View.OnScrollChangeListener() {
+            @Override
+            public void onScrollChange(View view, int scrollX, int scrollY, int oldScrollX, int oldScrollY) {
+
+                if ((scrollY <= 20 && oldScrollY <=20) || (scrollY <= 20 && oldScrollY >= 20)) {
+                    recyclerView.smoothScrollToPosition(scrollY);
+                }
+            }
+        });
+
+        List<Post> theList = new ArrayList<Post>();
 
         recyclerView.setLayoutManager(new GridLayoutManager(getActivity(), 3, GridLayout.VERTICAL, false) {
             @Override
             public boolean canScrollVertically() {
-                return false;
+                return true;
+            }
+        });
+
+        recyclerView.setOnScrollChangeListener(new View.OnScrollChangeListener() {
+            @Override
+            public void onScrollChange(View view, int scrollX, int scrollY, int oldScrollX, int oldScrollY) {
+
+                Log.i(Logs.POINT_OF_INTEREST, "y: " + scrollY + " oldy :" + oldScrollY);
+
+                if ((scrollY <= 20 && oldScrollY <= 20) || (scrollY <= 20 && oldScrollY >= 20)) {
+                    scrollView.smoothScrollTo(0,scrollY);
+                }
             }
         });
         ProfileAdapter adapter = new ProfileAdapter(getContext(), theList);
         recyclerView.setAdapter(adapter);
 
-        user = ((MainActivity) getActivity()).user;
         getAllProfilePost();
 
         return rootView;
@@ -106,9 +128,12 @@ public class ProfileFragment extends Fragment {
                 List<Post> listOfPosts = new ArrayList<Post>();
 
                 for (DataSnapshot postByUser : dataSnapshot.getChildren()) {
+                    Log.i(Logs.POINT_OF_INTEREST, "In Profile fragment!!!");
                     System.out.println(postByUser);
 
-                    listOfPosts.add(postByUser.getValue(Post.class));
+                    for(int i = 0; i < 5; i++) {
+                        listOfPosts.add(postByUser.getValue(Post.class));
+                    }
 
                 }
                 ((MainActivity) getActivity()).showProgress(false);
@@ -125,8 +150,8 @@ public class ProfileFragment extends Fragment {
     }
 
     private void setUpTopView() {
-        textView.setText(user.getDisplayName());
-        //Picasso.with(getActivity()).load(user.getPhotoUrl())
+        //textView.setText(user.getDisplayName());
+        //Picasso.with(getActivity()).load(user.getPhotoUrl()).into(imageView);
     }
 
     // TODO: Rename method, update argument and hook method into UI event

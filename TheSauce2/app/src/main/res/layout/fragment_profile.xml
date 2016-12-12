@@ -6,6 +6,7 @@
     tools:context="com.carolinagold.thesauce.ProfileFragment">
 
     <ScrollView
+        android:id="@+id/profile_fragment_scroll_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
@@ -19,6 +20,7 @@
                 android:id="@+id/profile_fragment_linear_layout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:background="#e0e0e0"
                 android:orientation="horizontal">
 
                 <ImageView

@@ -340,11 +340,6 @@ public class PostCreator extends AppCompatActivity implements GoogleApiClient.Co
 
 
 
-
-
-
-
-
     public void myClickHandler(View view) {
 
         switch (view.getId()) {
