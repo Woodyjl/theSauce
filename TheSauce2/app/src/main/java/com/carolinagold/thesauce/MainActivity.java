@@ -297,6 +297,27 @@ public class MainActivity extends AppCompatActivity implements OnFragmentInterac
                 if(user != null)
                     mAuth.signOut();
 
+                mAuthListener = new FirebaseAuth.AuthStateListener() {
+                    public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+                        user = firebaseAuth.getCurrentUser();
+
+                        if(user != null) {
+                    /*
+                    user is signed in, stay in the main activity
+                     */
+                            Log.d(TAG, "onAuthStateChanged:signed_in:" + user.getUid());
+                        }
+                        else {
+                    /*
+                    user is signed out, take them to the login screen
+                     */
+                            Log.d(TAG, "onAuthStateChanged:signed_out");
+                            startActivity(new Intent(MainActivity.this, LoginActivity.class));
+                        }
+                    }
+
+                };
+
                 return true;
             default:
                 break;

@@ -127,8 +127,33 @@ public class ProfileFragment extends Fragment {
     }
 
     private void setUpTopView() {
-        textView.setText(user.getDisplayName());
-        Picasso.with(getActivity()).load(user.getPhotoUrl()).into(imageView);
+
+        FirebaseDatabase dbRef = FirebaseDatabase.getInstance();
+        DatabaseReference myRef = dbRef.getReference("userProfileInfo").child(user.getUid());
+
+        ((MainActivity) getActivity()).showProgress(true);
+        myRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+
+                for (DataSnapshot userInfo : dataSnapshot.getChildren()) {
+                    Log.i(Logs.POINT_OF_INTEREST, "In Profile fragment!!!");
+
+                    if (userInfo.getKey().contains("userName")) {
+                        textView.setText(userInfo.getValue(String.class));
+                    } else {
+                        Picasso.with(getActivity()).load(userInfo.getValue(String.class)).into(imageView);
+                    }
+                }
+                ((MainActivity) getActivity()).showProgress(false);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.i(Logs.POINT_OF_INTEREST, "Failed retrieving data from firebase from method: setUpTopView");
+                ((MainActivity) getActivity()).showProgress(false);
+            }
+        });
     }
 
     // TODO: Rename method, update argument and hook method into UI event
