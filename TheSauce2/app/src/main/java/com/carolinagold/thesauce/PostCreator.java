@@ -39,10 +39,13 @@ import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.LocationSettingsResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Transaction;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -58,17 +61,23 @@ public class PostCreator extends AppCompatActivity implements GoogleApiClient.Co
     private ImageView photoImageView;
     private EditText captionEditText;
     private TextView locationTextView;
+    private Uri pictureUri;
 
     private static final int RESULT_FROM_GALLERY = 1;
     private static final int RESULT_FROM_CAMERA = 2;
-    private static final String TAG = "PostCreator";
 
     public boolean photoChosen = false;
 
     private GoogleApiClient googleAPIClient;
     private Location currentLocation;
     private LocationRequest locationRequest;
-    private AddressResultReceiver mResultReceiver;
+
+    private double latitude;
+    private double longitude;
+
+    private FirebaseDatabase dbRef = FirebaseDatabase.getInstance();
+
+
 
     private String decodedAddress;
 
@@ -109,6 +118,7 @@ public class PostCreator extends AppCompatActivity implements GoogleApiClient.Co
         LocationSettingsResult settingsResult;
 
         locationRequest = new LocationRequest();
+
         locationRequest.setInterval(getResources().getInteger(
                 R.integer.time_between_location_updates_ms));
         locationRequest.setFastestInterval(getResources().getInteger(
@@ -145,62 +155,33 @@ public class PostCreator extends AppCompatActivity implements GoogleApiClient.Co
 
             locationText = (TextView) findViewById(R.id.location_text);
 
-            currentText = locationText.getText().toString();
+            //currentText = locationText.getText().toString();
 
 
             timeOfChange = new Time();
             timeOfChange.set(currentLocation.getTime());
-            currentText += timeOfChange.format("%A %D %T") + "   ";
-            currentText += "\nProvider " + currentLocation.getProvider() + " found location\n";
+            //currentText += timeOfChange.format("%A %D %T") + "   ";
+            //currentText += "\nProvider " + currentLocation.getProvider() + " found location\n";
 
-            currentText += String.format("%.2f %s", newLocation.getLatitude(),
-                    newLocation.getLatitude() >= 0.0 ? "N" : "S") + "   ";
-            currentText += String.format("%.2f %s", newLocation.getLongitude(),
-                    newLocation.getLongitude() >= 0.0 ? "E" : "W") + "   ";
-            if (newLocation.hasAccuracy()) {
-                currentText += String.format("%.2fm", newLocation.getAccuracy());
-            }
-            currentText += "\n\n";
+            latitude = newLocation.getLatitude();
+            longitude = newLocation.getLongitude();
+
+            decodedAddress = getCompleteAddressString(latitude, longitude);
+
+            currentText = decodedAddress;
+
+            //currentText += String.format("%.2f %s", newLocation.getLatitude(),
+               //     newLocation.getLatitude() >= 0.0 ? "N" : "S") + "   ";
+            //currentText += String.format("%.2f %s", newLocation.getLongitude(),
+             //       newLocation.getLongitude() >= 0.0 ? "E" : "W") + "   ";
+            //if (newLocation.hasAccuracy()) {
+            //    currentText += String.format("%.2fm", newLocation.getAccuracy());
+            //}
+           // currentText += "\n\n";
             locationText.setText(currentText);
 
         }
-        else if (currentLocation.distanceTo(newLocation) > 10) {
-            TextView locationText;
-            String currentText;
-            Time timeOfChange;
 
-            locationText = (TextView) findViewById(R.id.location_text);
-            currentText = locationText.getText().toString();
-
-            currentLocation = newLocation;
-
-            timeOfChange = new Time();
-            timeOfChange.set(currentLocation.getTime());
-            currentText += timeOfChange.format("%A %D %T") + "   ";
-            currentText += "\nProvider " + currentLocation.getProvider() + " found location\n";
-
-            currentText += String.format("%.2f %s", newLocation.getLatitude(),
-                    newLocation.getLatitude() >= 0.0 ? "N" : "S") + "   ";
-            currentText += String.format("%.2f %s", newLocation.getLongitude(),
-                    newLocation.getLongitude() >= 0.0 ? "E" : "W") + "   ";
-            if (newLocation.hasAccuracy()) {
-                currentText += String.format("%.2fm", newLocation.getAccuracy());
-            }
-            currentText += "\n\n";
-            locationText.setText(currentText);
-
-
-
-        }
-        if(!Geocoder.isPresent()) {
-            Toast.makeText(this, R.string.no_geocoder_availible,
-                    Toast.LENGTH_LONG).show();
-        }
-        else {
-            Log.i("TEST", "startIntentService was called");
-
-            startIntentService();
-        }
     }
 
     public void onConnectionFailed(ConnectionResult result) {
@@ -212,138 +193,29 @@ public class PostCreator extends AppCompatActivity implements GoogleApiClient.Co
 
     }
 
-    public final class Constants {
-        public static final int SUCCESS_RESULT = 0;
-        public static final int FAILURE_RESULT = 1;
-        public static final String PACKAGE_NAME =
-                "com.google.android.gms.location.sample.locationaddress";
-        public static final String RECEIVER = PACKAGE_NAME + ".RECEIVER";
-        public static final String RESULT_DATA_KEY = PACKAGE_NAME +
-                ".RESULT_DATA_KEY";
-        public static final String LOCATION_DATA_EXTRA = PACKAGE_NAME +
-                ".LOCATION_DATA_EXTRA";
-    }
+    private String getCompleteAddressString(double LATITUDE, double LONGITUDE) {
+        String strAdd = "";
+        Geocoder geocoder = new Geocoder(this, Locale.getDefault());
+        try {
+            List<android.location.Address> addresses = geocoder.getFromLocation(LATITUDE, LONGITUDE, 1);
+            if (addresses != null) {
+                android.location.Address returnedAddress = addresses.get(0);
+                StringBuilder strReturnedAddress = new StringBuilder("");
 
-    public class FetchAddressIntentService extends IntentService {
-        protected ResultReceiver mReceiver;
-
-        public FetchAddressIntentService() {
-            super("FetchAddressIntentService");
-        }
-
-        private void deliverResultToReceiver(int resultCode, String message) {
-            Log.i("TEST", "entered deliverResultToReciever");
-
-            Bundle bundle = new Bundle();
-            bundle.putString(Constants.RESULT_DATA_KEY, message);
-            mReceiver.send(resultCode, bundle);
-        }
-        @Override
-        protected void onHandleIntent(Intent intent) {
-            Log.i("TEST", "entered onHandleIntent");
-
-            Geocoder geocoder = new Geocoder(this, Locale.getDefault());
-            String errorMessage = "";
-
-            // Get the location passed to this service through an extra.
-            Location location = intent.getParcelableExtra(
-                    Constants.LOCATION_DATA_EXTRA);
-
-
-            List<android.location.Address> addresses = null;
-
-            try {
-                addresses = geocoder.getFromLocation(
-                        location.getLatitude(),
-                        location.getLongitude(),
-                        // In this sample, get just a single address.
-                        1);
-            } catch (IOException ioException) {
-                // Catch network or other I/O problems.
-                errorMessage = getString(R.string.service_not_available);
-                Log.e(TAG, errorMessage, ioException);
-            } catch (IllegalArgumentException illegalArgumentException) {
-                // Catch invalid latitude or longitude values.
-                errorMessage = getString(R.string.invalid_lat_long_used);
-                Log.e(TAG, errorMessage + ". " +
-                        "Latitude = " + location.getLatitude() +
-                        ", Longitude = " +
-                        location.getLongitude(), illegalArgumentException);
-            }
-
-            // Handle case where no address was found.
-            if (addresses == null || addresses.size()  == 0) {
-                if (errorMessage.isEmpty()) {
-                    errorMessage = getString(R.string.no_address_found);
-                    Log.e(TAG, errorMessage);
+                for (int i = 0; i < returnedAddress.getMaxAddressLineIndex(); i++) {
+                    strReturnedAddress.append(returnedAddress.getAddressLine(i)).append("\n");
                 }
-                deliverResultToReceiver(Constants.FAILURE_RESULT, errorMessage);
+                strAdd = strReturnedAddress.toString();
+                Log.w("Current loction address", "" + strReturnedAddress.toString());
             } else {
-                android.location.Address address = addresses.get(0);
-                ArrayList<String> addressFragments = new ArrayList<String>();
-
-                // Fetch the address lines using getAddressLine,
-                // join them, and send them to the thread.
-                for(int i = 0; i < address.getMaxAddressLineIndex(); i++) {
-                    addressFragments.add(address.getAddressLine(i));
-                }
-                Log.i(TAG, getString(R.string.address_found));
-                deliverResultToReceiver(Constants.SUCCESS_RESULT,
-                        TextUtils.join(System.getProperty("line.separator"),
-                                addressFragments));
+                Log.w("Current loction address", "No Address returned!");
             }
+        } catch (Exception e) {
+            e.printStackTrace();
+            Log.w("Current loction address", "Canont get Address!");
         }
+        return strAdd;
     }
-    protected void startIntentService() {
-        Log.i("TEST", "entered startIntentService");
-
-        Intent intent = new Intent(this, FetchAddressIntentService.class);
-        intent.putExtra(Constants.RECEIVER, mResultReceiver);
-        intent.putExtra(Constants.LOCATION_DATA_EXTRA, currentLocation);
-        startService(intent);
-    }
-    public void fetchAddressButtonHandler(View view) {
-        // Only start the service to fetch the address if GoogleApiClient is
-        // connected.
-        if (googleAPIClient.isConnected() && currentLocation != null) {
-            startIntentService();
-        }
-        // If GoogleApiClient isn't connected, process the user's request by
-        // setting mAddressRequested to true. Later, when GoogleApiClient connects,
-        // launch the service to fetch the address. As far as the user is
-        // concerned, pressing the Fetch Address button
-        // immediately kicks off the process of getting the address.
-
-    }
-    class AddressResultReceiver extends ResultReceiver {
-        public AddressResultReceiver(Handler handler) {
-            super(handler);
-        }
-
-        @Override
-        protected void onReceiveResult(int resultCode, Bundle resultData) {
-            Log.i("TEST", "entered onRecievedResult");
-            // Display the address string
-            // or an error message sent from the intent service.
-            decodedAddress = resultData.getString(Constants.RESULT_DATA_KEY);
-            locationTextView.setText(decodedAddress);
-
-
-            // Show a toast message if an address was found.
-            if (resultCode == Constants.SUCCESS_RESULT) {
-                Toast.makeText(PostCreator.this, R.string.address_found, Toast.LENGTH_LONG).show();
-
-            }
-
-        }
-    }
-
-
-
-
-
-
-
 
     public void myClickHandler(View view) {
 
@@ -371,30 +243,45 @@ public class PostCreator extends AppCompatActivity implements GoogleApiClient.Co
                         .show();
                 break;
             case R.id.post_button:
+                if(!photoChosen) {
+                    Toast.makeText(this,"Pick a photo!",Toast.LENGTH_LONG).show();
+                }
+                else {
 
 
+                    Calendar calendar = Calendar.getInstance();
+                    SimpleDateFormat mdformat = new SimpleDateFormat("yyyy / MM / dd ");
+                    String strDate = "Current Date : " + mdformat.format(calendar.getTime());
 
+                    caption = (String)((EditText)findViewById(R.id.caption_text)).toString();
+                    String imagePath = pictureUri.toString();
 
-
+                    Post post = new Post(uId,displayName, imagePath, strDate, decodedAddress, caption);
+                    
+                }
         }
-
     }
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == RESULT_FROM_CAMERA && resultCode == Activity.RESULT_OK) {
-            Bitmap photo = (Bitmap) data.getExtras().get("data");
-            photoImageView.setImageBitmap(photo);
+            pictureUri = data.getData();
+
+
+            //Bitmap photo = (Bitmap) data.getExtras().get("data");
+           // photoImageView.setImageBitmap(photo);
+            photoImageView.setImageURI(pictureUri);
             photoChosen = true;
         }
         if (requestCode == RESULT_FROM_GALLERY && resultCode == RESULT_OK && null != data) {
-            Uri selectedImage = data.getData();
-            String[] filePathColumn = {MediaStore.Images.Media.DATA};
-            Cursor cursor = getContentResolver().query(selectedImage, filePathColumn, null, null, null);
-            cursor.moveToFirst();
-            int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
-            String picturePath = cursor.getString(columnIndex);
-            cursor.close();
+            pictureUri = data.getData();
+            //String[] filePathColumn = {MediaStore.Images.Media.DATA};
+            //Cursor cursor = getContentResolver().query(selectedImage, filePathColumn, null, null, null);
+            //cursor.moveToFirst();
+           // int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
+            //String picturePath = cursor.getString(columnIndex);
+            //cursor.close();
             ImageView imageView = (ImageView) findViewById(R.id.edit_image);
-            imageView.setImageBitmap(BitmapFactory.decodeFile(picturePath));
+            imageView.setImageURI(pictureUri);
+            //imageView.setImageBitmap(BitmapFactory.decodeFile(picturePath));
             photoChosen = true;
         }
     }
