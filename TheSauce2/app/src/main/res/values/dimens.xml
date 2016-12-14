@@ -8,7 +8,7 @@
 
     <!--Dimensions relating to newsfeed posts-->
     <dimen name="news_feed_list_width">300dp</dimen>
-    <dimen name="news_feed_post_layout_profile_picture_dimen">40dp</dimen>
+    <dimen name="news_feed_post_layout_profile_picture_dimen">50dp</dimen>
 
     <!--Dimensions relating to createPost-->
 

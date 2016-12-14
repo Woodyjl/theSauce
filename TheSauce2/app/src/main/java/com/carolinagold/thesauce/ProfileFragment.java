@@ -4,6 +4,7 @@ import android.content.Context;
 import android.media.ImageWriter;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -14,6 +15,7 @@ import android.support.v4.app.Fragment;
 import android.widget.Button;
 import android.widget.GridLayout;
 import android.widget.ImageView;
+import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.google.firebase.auth.FirebaseAuth;
@@ -36,6 +38,7 @@ public class ProfileFragment extends Fragment {
 
     ImageView imageView;
     TextView textView;
+    ScrollView scrollView;
 
     FirebaseUser user;
 
@@ -64,30 +67,28 @@ public class ProfileFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View rootView = inflater.inflate(R.layout.fragment_profile, container, false);
-
+        user = ((MainActivity) getActivity()).getUser();
         imageView = (ImageView) rootView.findViewById(R.id.profile_fragment_profile_image);
         textView = (TextView) rootView.findViewById(R.id.profile_fragment_profile_name);
-        setUpTopView();
+        if (user != null)
+            setUpTopView();
 
         recyclerView = (RecyclerView) rootView.findViewById(R.id.profile_fragment_recycler_grid);
 
         List<Post> theList = new ArrayList<Post>();
 
-        for (int i = 0; i < 10; i++) {
-            theList.add(new Post("n " + i, " HelloWorld", " HelloWorld"," HelloWorld"," HelloWorld"," HelloWorld"));
-        }
-
         recyclerView.setLayoutManager(new GridLayoutManager(getActivity(), 3, GridLayout.VERTICAL, false) {
             @Override
             public boolean canScrollVertically() {
-                return false;
+                return true;
             }
         });
+
         ProfileAdapter adapter = new ProfileAdapter(getContext(), theList);
         recyclerView.setAdapter(adapter);
 
-        user = ((MainActivity) getActivity()).user;
-        getAllProfilePost();
+        if (user != null)
+            getAllProfilePost();
 
         return rootView;
     }
@@ -106,9 +107,12 @@ public class ProfileFragment extends Fragment {
                 List<Post> listOfPosts = new ArrayList<Post>();
 
                 for (DataSnapshot postByUser : dataSnapshot.getChildren()) {
+                    Log.i(Logs.POINT_OF_INTEREST, "In Profile fragment!!!");
                     System.out.println(postByUser);
 
-                    listOfPosts.add(postByUser.getValue(Post.class));
+                    for(int i = 0; i < 5; i++) {
+                        listOfPosts.add(postByUser.getValue(Post.class));
+                    }
 
                 }
                 ((MainActivity) getActivity()).showProgress(false);
@@ -125,8 +129,33 @@ public class ProfileFragment extends Fragment {
     }
 
     private void setUpTopView() {
-        textView.setText(user.getDisplayName());
-        //Picasso.with(getActivity()).load(user.getPhotoUrl())
+
+        FirebaseDatabase dbRef = FirebaseDatabase.getInstance();
+        DatabaseReference myRef = dbRef.getReference("userProfileInfo").child(user.getUid());
+
+        ((MainActivity) getActivity()).showProgress(true);
+        myRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+
+                for (DataSnapshot userInfo : dataSnapshot.getChildren()) {
+                    Log.i(Logs.POINT_OF_INTEREST, "In Profile fragment!!!");
+
+                    if (userInfo.getKey().contains("userName")) {
+                        textView.setText(userInfo.getValue(String.class));
+                    } else {
+                        Picasso.with(getActivity()).load(userInfo.getValue(String.class)).into(imageView);
+                    }
+                }
+                ((MainActivity) getActivity()).showProgress(false);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.i(Logs.POINT_OF_INTEREST, "Failed retrieving data from firebase from method: setUpTopView");
+                ((MainActivity) getActivity()).showProgress(false);
+            }
+        });
     }
 
     // TODO: Rename method, update argument and hook method into UI event

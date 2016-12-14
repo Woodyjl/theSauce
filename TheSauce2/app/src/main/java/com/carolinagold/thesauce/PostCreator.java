@@ -216,6 +216,54 @@ public class PostCreator extends AppCompatActivity implements GoogleApiClient.Co
         }
         return strAdd;
     }
+<<<<<<< HEAD
+=======
+    protected void startIntentService() {
+        Log.i("TEST", "entered startIntentService");
+
+        Intent intent = new Intent(this, FetchAddressIntentService.class);
+        intent.putExtra(Constants.RECEIVER, mResultReceiver);
+        intent.putExtra(Constants.LOCATION_DATA_EXTRA, currentLocation);
+        startService(intent);
+    }
+    public void fetchAddressButtonHandler(View view) {
+        // Only start the service to fetch the address if GoogleApiClient is
+        // connected.
+        if (googleAPIClient.isConnected() && currentLocation != null) {
+            startIntentService();
+        }
+        // If GoogleApiClient isn't connected, process the user's request by
+        // setting mAddressRequested to true. Later, when GoogleApiClient connects,
+        // launch the service to fetch the address. As far as the user is
+        // concerned, pressing the Fetch Address button
+        // immediately kicks off the process of getting the address.
+
+    }
+    class AddressResultReceiver extends ResultReceiver {
+        public AddressResultReceiver(Handler handler) {
+            super(handler);
+        }
+
+        @Override
+        protected void onReceiveResult(int resultCode, Bundle resultData) {
+            Log.i("TEST", "entered onRecievedResult");
+            // Display the address string
+            // or an error message sent from the intent service.
+            decodedAddress = resultData.getString(Constants.RESULT_DATA_KEY);
+            locationTextView.setText(decodedAddress);
+
+
+            // Show a toast message if an address was found.
+            if (resultCode == Constants.SUCCESS_RESULT) {
+                Toast.makeText(PostCreator.this, R.string.address_found, Toast.LENGTH_LONG).show();
+
+            }
+
+        }
+    }
+
+
+>>>>>>> 331d8aa1abb2206c68d19270fb26085fd132d7e1
 
     public void myClickHandler(View view) {
 

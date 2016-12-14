@@ -54,10 +54,6 @@ public class NewFeedFragment extends Fragment {
 
         List<Post> theList = new ArrayList<Post>();
 
-        for (int i = 0; i < 10; i++) {
-            theList.add(new Post("n " + i, " HelloWorld", " HelloWorld"," HelloWorld"," HelloWorld"," HelloWorld"));
-        }
-
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         NewsFeedAdaptor adapter = new NewsFeedAdaptor(getContext(), theList);
         recyclerView.setAdapter(adapter);

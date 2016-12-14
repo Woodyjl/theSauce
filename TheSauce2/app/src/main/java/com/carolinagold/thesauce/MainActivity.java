@@ -129,6 +129,7 @@ public class MainActivity extends AppCompatActivity implements OnFragmentInterac
             @Override
             public void onClick(View view) {
 
+                //Create a new post
                 String uId = user.getUid();
                 String displayName = user.getDisplayName();
 
@@ -140,18 +141,20 @@ public class MainActivity extends AppCompatActivity implements OnFragmentInterac
                 postCreateActivity.putExtra("displayName", displayName);
                 startActivityForResult(postCreateActivity, POST_CREATE_ACTIVITY);
 
-
-
-                Snackbar.make(view, "Cool! you want to create a new post", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-
-
-                //Create a new post
-
             }
         });
 
+
+
+//        Snackbar.make(view, "Cool! you want to create a new post", Snackbar.LENGTH_LONG)
+//                .setAction("Action", null).show();
+
     }
+
+    public FirebaseUser getUser() {
+       return mAuth.getCurrentUser();
+    }
+
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         switch (requestCode) {
             case POST_CREATE_ACTIVITY:
@@ -193,10 +196,7 @@ public class MainActivity extends AppCompatActivity implements OnFragmentInterac
         SectionsPagerAdapter adapter = new SectionsPagerAdapter(getSupportFragmentManager());
 
 
-          newFeedFragment = new NewFeedFragment();
-//        Bundle args = new Bundle();
-//        args.putSerializable("posts", (Serializable) getLatestPost());
-//        fragment.setArguments(args);
+        newFeedFragment = new NewFeedFragment();
         adapter.addFragment(newFeedFragment, getString(R.string.news_feed_fragment));
 
         profileFragment = new ProfileFragment();
@@ -289,12 +289,34 @@ public class MainActivity extends AppCompatActivity implements OnFragmentInterac
         switch (id) {
             case R.id.action_settings:
                 Toast.makeText(this, "Works", Toast.LENGTH_LONG);
+                Log.i(Logs.POINT_OF_INTEREST, "This actually works");
                 return true;
             case R.id.log_out:
 
                 user = mAuth.getCurrentUser();
                 if(user != null)
                     mAuth.signOut();
+
+                mAuthListener = new FirebaseAuth.AuthStateListener() {
+                    public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+                        user = firebaseAuth.getCurrentUser();
+
+                        if(user != null) {
+                    /*
+                    user is signed in, stay in the main activity
+                     */
+                            Log.d(TAG, "onAuthStateChanged:signed_in:" + user.getUid());
+                        }
+                        else {
+                    /*
+                    user is signed out, take them to the login screen
+                     */
+                            Log.d(TAG, "onAuthStateChanged:signed_out");
+                            startActivity(new Intent(MainActivity.this, LoginActivity.class));
+                        }
+                    }
+
+                };
 
                 return true;
             default:
