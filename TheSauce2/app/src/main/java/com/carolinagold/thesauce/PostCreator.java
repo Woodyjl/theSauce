@@ -114,7 +114,7 @@ public class PostCreator extends AppCompatActivity implements GoogleApiClient.Co
 
 
         String array[] = {READ_EXTERNAL_STORAGE, WRITE_EXTERNAL_STORAGE, CAMERA};
-        new PermissionHandler(this, this, array);
+       // new PermissionHandler(PostCreator.this, PostCreator.this, array);
 
     }
     public void onStart() {
@@ -240,10 +240,10 @@ public class PostCreator extends AppCompatActivity implements GoogleApiClient.Co
                         .setPositiveButton(getResources().getString(R.string.choose_gallery), new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int which) {
                                 Intent galleryIntent;
-                                if(haveREStoragePermission && haveEXStoragePermission) {
+                               // if(haveREStoragePermission && haveEXStoragePermission) {
                                     galleryIntent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
                                     startActivityForResult(galleryIntent, RESULT_FROM_GALLERY);
-                                }
+                                //}
                             }
                         })
                         .setNegativeButton(getResources().getString(R.string.choose_camera), new DialogInterface.OnClickListener() {
@@ -253,16 +253,13 @@ public class PostCreator extends AppCompatActivity implements GoogleApiClient.Co
 
 
 
-                                Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                               if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
-                                  startActivityForResult(takePictureIntent, RESULT_FROM_CAMERA);
-                               }
-                                if (haveCameraPermission) {
+
+                                //if (haveCameraPermission) {
                                     Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                                     if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
                                         startActivityForResult(takePictureIntent, RESULT_FROM_CAMERA);
                                     }
-                                }
+                               // }
                             }
                         }).setIcon(android.R.drawable.ic_dialog_alert)
                         .show();
@@ -278,8 +275,7 @@ public class PostCreator extends AppCompatActivity implements GoogleApiClient.Co
                     SimpleDateFormat mdformat = new SimpleDateFormat("yyyy / MM / dd ");
                     String strDate = "Current Date : " + mdformat.format(calendar.getTime());
 
-                    caption = (String)((EditText)findViewById(R.id.caption_text)).toString();
-
+                    caption = (String)((EditText)findViewById(R.id.caption_text)).getText().toString();
 
                     Post post = new Post(uId,displayName, bitmap, strDate, decodedAddress, caption);
                     post.pushToCloud(this);
@@ -294,7 +290,6 @@ public class PostCreator extends AppCompatActivity implements GoogleApiClient.Co
 
 
 
-            Log.i("TEST", pictureUri.toString());
 
             photoImageView.setImageBitmap(bitmap);
             photoImageView.setImageURI(pictureUri);
