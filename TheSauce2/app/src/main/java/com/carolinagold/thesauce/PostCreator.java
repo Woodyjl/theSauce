@@ -1,5 +1,7 @@
 package com.carolinagold.thesauce;
 
+import android.*;
+import android.Manifest;
 import android.app.Activity;
 import android.app.IntentService;
 import android.content.Context;
@@ -18,6 +20,7 @@ import android.os.ResultReceiver;
 import android.provider.MediaStore;
 import android.speech.tts.TextToSpeech;
 import android.support.design.widget.TabLayout;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -113,10 +116,42 @@ public class PostCreator extends AppCompatActivity implements GoogleApiClient.Co
                 addApi(LocationServices.API).build();
 
 
-        String array[] = {READ_EXTERNAL_STORAGE, WRITE_EXTERNAL_STORAGE, CAMERA};
-       // new PermissionHandler(PostCreator.this, PostCreator.this, array);
+        //String array[] = {READ_EXTERNAL_STORAGE, WRITE_EXTERNAL_STORAGE, CAMERA};
+        //Log.i("TEST", "" + array);
 
+       //new PermissionHandler(PostCreator.this, PostCreator.this, array);
+
+        ActivityCompat.requestPermissions(PostCreator.this,
+                new String[]{android.Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.CAMERA},
+                1);
     }
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case 1: {
+
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+                    // permission was granted, yay! Do the
+                    // contacts-related task you need to do.
+                } else {
+
+                    // permission denied, boo! Disable the
+                    // functionality that depends on this permission.
+                    Toast.makeText(PostCreator.this, "Permission denied to read your External storage", Toast.LENGTH_SHORT).show();
+                }
+                return;
+            }
+
+            // other 'case' lines to check for other
+            // permissions this app might request
+        }
+    }
+
+
     public void onStart() {
         googleAPIClient.connect();
         super.onStart();
