@@ -31,6 +31,10 @@
             android:label="@string/title_activity_login" />
         <activity android:name=".SignUpActivity" />
         <activity android:name=".PostCreator"></activity>
+<<<<<<< HEAD
+=======
+
+>>>>>>> 7045683b414f051749aae9b8ea6e4ce9c513e96a
     </application>
 
 </manifest>
