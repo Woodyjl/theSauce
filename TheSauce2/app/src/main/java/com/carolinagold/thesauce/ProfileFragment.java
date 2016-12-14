@@ -70,7 +70,8 @@ public class ProfileFragment extends Fragment {
         user = ((MainActivity) getActivity()).getUser();
         imageView = (ImageView) rootView.findViewById(R.id.profile_fragment_profile_image);
         textView = (TextView) rootView.findViewById(R.id.profile_fragment_profile_name);
-        setUpTopView();
+        if (user != null)
+            setUpTopView();
 
         recyclerView = (RecyclerView) rootView.findViewById(R.id.profile_fragment_recycler_grid);
 
@@ -86,7 +87,8 @@ public class ProfileFragment extends Fragment {
         ProfileAdapter adapter = new ProfileAdapter(getContext(), theList);
         recyclerView.setAdapter(adapter);
 
-        getAllProfilePost();
+        if (user != null)
+            getAllProfilePost();
 
         return rootView;
     }

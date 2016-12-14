@@ -11,14 +11,19 @@ import android.widget.Toast;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
 import java.io.ByteArrayOutputStream;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by woodyjean-louis on 12/9/16.
@@ -90,17 +95,35 @@ public class Post extends Object implements Serializable {
                     Uri downloadUrl = taskSnapshot.getDownloadUrl();
 
                     FirebaseDatabase database = FirebaseDatabase.getInstance();
-                    DatabaseReference myRef = database.getReference("Post");
 
                     // Creates a post in the real time database with paths to the image file in storage
-                    String key = myRef.child(uId).push().getKey();
-                    myRef.child(uId).child(key).child("userProfilePicturePath").setValue("Hello, World!");
-                    myRef.child(uId).child(key).child("userName").setValue(userName);
-                    myRef.child(uId).child(key).child("uId").setValue(uId);
-                    myRef.child(uId).child(key).child("location").setValue(location);
-                    myRef.child(uId).child(key).child("caption").setValue(caption);
-                    myRef.child(uId).child(key).child("date").setValue(date);
-                    myRef.child(uId).child(key).child("imagePath").setValue(downloadUrl.toString());
+
+                    final DatabaseReference myPostRef = database.getReference("Post");
+                    final String key = myPostRef.child(uId).push().getKey();
+                    myPostRef.child(uId).child(key).child("userName").setValue(userName);
+                    myPostRef.child(uId).child(key).child("uId").setValue(uId);
+                    myPostRef.child(uId).child(key).child("location").setValue(location);
+                    myPostRef.child(uId).child(key).child("caption").setValue(caption);
+                    myPostRef.child(uId).child(key).child("date").setValue(date);
+                    myPostRef.child(uId).child(key).child("imagePath").setValue(downloadUrl.toString());
+
+                    final DatabaseReference myUserRef = database.getReference("UserProfileInfo");
+
+                    myUserRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+
+                            String profileImagePath = dataSnapshot.getValue(String.class);
+                            myPostRef.child(uId).child(key).child("userProfilePicturePath").setValue(profileImagePath);
+                        }
+
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
+                            Log.i(Logs.POINT_OF_INTEREST, "Error in Post");
+                        }
+
+
+                    });
                 }
             });
         } catch (Exception e) {

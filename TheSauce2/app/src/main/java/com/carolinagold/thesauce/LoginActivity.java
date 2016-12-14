@@ -66,7 +66,7 @@ public class LoginActivity extends AppCompatActivity {
     /**
      * Keep track of the login task to ensure we can cancel it if requested.
      */
-    private UserLoginTask mAuthTask = null;
+    //private UserLoginTask mAuthTask = null;
 
     // UI references.
     private AutoCompleteTextView mEmailView;
@@ -80,35 +80,13 @@ public class LoginActivity extends AppCompatActivity {
     private FirebaseAuth.AuthStateListener mAuthListener;
     //tag for Log statements for debugging
     private String TAG = "LoginActivity";
+    boolean mAuthTask = false;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
-
-        //gets a Firebase Authenticator
-        mAuth = FirebaseAuth.getInstance();
-        //tracks when user signs in or out
-        mAuthListener = new FirebaseAuth.AuthStateListener() {
-            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
-                //gets the user to see if he is signed in or not
-                FirebaseUser user = firebaseAuth.getCurrentUser();
-                if(user != null) {
-                    //startActivity(new Intent(LoginActivity.this, MainActivity.class));
-
-                    //User is signed in
-                    Log.d(TAG, "onAuthStateChanged:signed_in:" + user.getUid());
-                    finish();
-                }
-                else {
-                    //user is signed out
-                    Log.d(TAG, "onAuthStateChanged:signed_out");
-                }
-            }
-
-        };
-
 
         // Set up the login form.
         mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
@@ -126,17 +104,41 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
 
-        if (true || checkPlayServiceVersion()) {
+        if (checkPlayServiceVersion() || true) {
             setButtons();
         }
 
         mLoginFormView = findViewById(R.id.login_form);
         mProgressView = findViewById(R.id.login_progress);
+        showProgress(true);
+
+
+        //gets a Firebase Authenticator
+        mAuth = FirebaseAuth.getInstance();
+        //tracks when user signs in or out
+        mAuthListener = new FirebaseAuth.AuthStateListener() {
+            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+                //gets the user to see if he is signed in or not
+                FirebaseUser user = firebaseAuth.getCurrentUser();
+                if(user != null) {
+                    //startActivity(new Intent(LoginActivity.this, MainActivity.class));
+
+                    //User is signed in
+                    Log.d(TAG, "onAuthStateChanged:signed_in: " + user.getUid());
+                    finish();
+                }
+                else {
+                    //user is signed out
+                    showProgress(false);
+                    Log.d(TAG, "onAuthStateChanged:signed_out");
+                }
+            }
+
+        };
 
         //Delete before launch
         mEmailView.setText(DUMMY_CREDENTIALS[0]);
         mPasswordView.setText(DUMMY_CREDENTIALS[1]);
-        //attemptLogin();
 
 
 
@@ -162,6 +164,8 @@ public class LoginActivity extends AppCompatActivity {
                 dialog.show();
                 break;
 
+            default:
+                return true;
         }
         return false;
     }
@@ -232,7 +236,7 @@ public class LoginActivity extends AppCompatActivity {
      * errors are presented and no actual login attempt is made.
      */
     private void attemptLogin() {
-        if (mAuthTask != null) {
+        if (mAuthTask != false) {
             return;
         }
 
@@ -276,8 +280,33 @@ public class LoginActivity extends AppCompatActivity {
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
             showProgress(true);
-            mAuthTask = new UserLoginTask(email, password);
-            mAuthTask.execute((Void) null);
+            mAuthTask = true;
+            //signs into your firebase account if you give valid credientials
+            mAuth.signInWithEmailAndPassword(email, password)
+                    .addOnCompleteListener(LoginActivity.this, new OnCompleteListener<AuthResult>() {
+                        @Override
+                        public void onComplete(@NonNull Task<AuthResult> task) {
+                            Log.d(TAG, "signInWithEmail:onComplete:" + task.isSuccessful());
+
+                            // If sign in fails, display a message to the user. If sign in succeeds
+                            // the auth state listener will be notified and logic to handle the
+                            // signed in user can be handled in the listener.
+                            if (!task.isSuccessful()) {
+                                Log.w(TAG, "signInWithEmail", task.getException());
+                                showProgress(false);
+                                mAuthTask = false;
+                                Toast.makeText(LoginActivity.this, "Authentication failed.",
+                                        Toast.LENGTH_SHORT).show();
+                            } else {
+                                mAuthTask = false;
+                                finish();
+                            }
+                        }
+                    });
+            //return true;
+
+            //mAuthTask = new UserLoginTask(email, password);
+            //mAuthTask.execute((Void) null);
         }
     }
 
@@ -337,65 +366,59 @@ public class LoginActivity extends AppCompatActivity {
         mEmailView.setAdapter(adapter);
     }
 
+    @Override
+    public void finish() {
+        showProgress(false);
+        super.finish();
+    }
+
+    @Override
+    public void onBackPressed() {
+        //should terminate application on back button pressed]
+        //.finish();
+        super.onBackPressed();
+    }
+
     /**
      * Represents an asynchronous login/registration task used to authenticate
      * the user.
      */
-    public class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
-
-        private final String mEmail;
-        private final String mPassword;
-
-        UserLoginTask(String email, String password) {
-            mEmail = email;
-            mPassword = password;
-            doInBackground();
-        }
-
-        @Override
-        protected Boolean doInBackground(Void... params) {
-            // TODO: attempt authentication against a network service.
-
-
-            //signs into your firebase account if you give valid credientials
-            mAuth.signInWithEmailAndPassword(mEmail, mPassword)
-                    .addOnCompleteListener(LoginActivity.this, new OnCompleteListener<AuthResult>() {
-                        @Override
-                        public void onComplete(@NonNull Task<AuthResult> task) {
-                            Log.d(TAG, "signInWithEmail:onComplete:" + task.isSuccessful());
-
-                            // If sign in fails, display a message to the user. If sign in succeeds
-                            // the auth state listener will be notified and logic to handle the
-                            // signed in user can be handled in the listener.
-                            if (!task.isSuccessful()) {
-                                Log.w(TAG, "signInWithEmail", task.getException());
-
-                                Toast.makeText(LoginActivity.this, "Authentication failed.",
-                                        Toast.LENGTH_SHORT).show();
-                            }
-                        }
-                    });
-            return true;
-        }
-
-        @Override
-        protected void onPostExecute(final Boolean success) {
-            mAuthTask = null;
-            showProgress(false);
-
-            if (success) {
-                finish();
-            } else {
-                mPasswordView.setError(getString(R.string.error_incorrect_password));
-                mPasswordView.requestFocus();
-            }
-        }
-
-        @Override
-        protected void onCancelled() {
-            mAuthTask = null;
-            showProgress(false);
-        }
-    }
+//    public class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
+//
+//        private final String mEmail;
+//        private final String mPassword;
+//
+//        UserLoginTask(String email, String password) {
+//            mEmail = email;
+//            mPassword = password;
+//            doInBackground();
+//        }
+//
+//        @Override
+//        protected Boolean doInBackground(Void... params) {
+//            // TODO: attempt authentication against a network service.
+//
+//
+//
+//
+//        @Override
+//        protected void onPostExecute(final Boolean success) {
+//            mAuthTask = null;
+//            showProgress(false);
+//
+//            if (success) {
+//                finish();
+//            } else {
+//                mPasswordView.setError(getString(R.string.error_incorrect_password));
+//                mPasswordView.requestFocus();
+//            }
+//        }
+//
+//        @Override
+//        protected void onCancelled() {
+//            mAuthTask = null;
+//            showProgress(false);
+//        }
+//    }
 }
 
