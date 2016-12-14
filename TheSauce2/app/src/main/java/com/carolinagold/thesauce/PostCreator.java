@@ -52,6 +52,7 @@ import java.util.List;
 import java.util.Locale;
 
 import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
+import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 import static android.Manifest.permission_group.CAMERA;
 import static android.Manifest.permission_group.STORAGE;
 
@@ -101,7 +102,9 @@ public class PostCreator extends AppCompatActivity implements GoogleApiClient.Co
         googleAPIClient = new GoogleApiClient.Builder(this).
                 addConnectionCallbacks(this).addOnConnectionFailedListener(this).
                 addApi(LocationServices.API).build();
-        String array[] = {READ_EXTERNAL_STORAGE, CAMERA};
+
+
+        String array[] = {READ_EXTERNAL_STORAGE, WRITE_EXTERNAL_STORAGE, CAMERA};
         new PermissionHandler(this, this, array);
 
     }
@@ -235,7 +238,7 @@ public class PostCreator extends AppCompatActivity implements GoogleApiClient.Co
                         .setPositiveButton(getResources().getString(R.string.choose_gallery), new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int which) {
                                 Intent galleryIntent;
-                                if(haveStoragePermission) {
+                                if(haveREStoragePermission && haveEXStoragePermission) {
                                     galleryIntent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
                                     startActivityForResult(galleryIntent, RESULT_FROM_GALLERY);
                                 }
@@ -298,7 +301,8 @@ public class PostCreator extends AppCompatActivity implements GoogleApiClient.Co
     }
 
     boolean haveCameraPermission = false;
-    boolean haveStoragePermission = false;
+    boolean haveREStoragePermission = false;
+    boolean haveEXStoragePermission = false;
 
 
     @Override
@@ -311,7 +315,11 @@ public class PostCreator extends AppCompatActivity implements GoogleApiClient.Co
                 break;
             case READ_EXTERNAL_STORAGE:
                 if (granted == PackageManager.PERMISSION_GRANTED)
-                    haveStoragePermission = true;
+                    haveREStoragePermission = true;
+                break;
+            case WRITE_EXTERNAL_STORAGE:
+                if (granted == PackageManager.PERMISSION_GRANTED)
+                    haveEXStoragePermission = true;
         }
     }
 }
