@@ -73,6 +73,7 @@ public class PostCreator extends AppCompatActivity implements GoogleApiClient.Co
     private ImageView photoImageView;
     private EditText captionEditText;
     private TextView locationTextView;
+    private Bitmap bitmap;
     private Uri pictureUri;
 
     private static final int RESULT_FROM_GALLERY = 1;
@@ -227,10 +228,6 @@ public class PostCreator extends AppCompatActivity implements GoogleApiClient.Co
         }
         return strAdd;
     }
-<<<<<<< HEAD
-
-=======
->>>>>>> 7045683b414f051749aae9b8ea6e4ce9c513e96a
 
     public void myClickHandler(View view) {
 
@@ -251,7 +248,6 @@ public class PostCreator extends AppCompatActivity implements GoogleApiClient.Co
                         })
                         .setNegativeButton(getResources().getString(R.string.choose_camera), new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int which) {
-<<<<<<< HEAD
 
 
 
@@ -261,14 +257,12 @@ public class PostCreator extends AppCompatActivity implements GoogleApiClient.Co
                                if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
                                   startActivityForResult(takePictureIntent, RESULT_FROM_CAMERA);
                                }
-=======
                                 if (haveCameraPermission) {
                                     Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                                     if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
                                         startActivityForResult(takePictureIntent, RESULT_FROM_CAMERA);
                                     }
                                 }
->>>>>>> 7045683b414f051749aae9b8ea6e4ce9c513e96a
                             }
                         }).setIcon(android.R.drawable.ic_dialog_alert)
                         .show();
@@ -285,9 +279,9 @@ public class PostCreator extends AppCompatActivity implements GoogleApiClient.Co
                     String strDate = "Current Date : " + mdformat.format(calendar.getTime());
 
                     caption = (String)((EditText)findViewById(R.id.caption_text)).toString();
-                    String imagePath = pictureUri.toString();
 
-                    Post post = new Post(uId,displayName, imagePath, strDate, decodedAddress, caption);
+
+                    Post post = new Post(uId,displayName, bitmap, strDate, decodedAddress, caption);
                     post.pushToCloud(this);
                     
                 }
@@ -295,32 +289,28 @@ public class PostCreator extends AppCompatActivity implements GoogleApiClient.Co
     }
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == RESULT_FROM_CAMERA && resultCode == Activity.RESULT_OK) {
-            //Bitmap photo = (Bitmap) data.getExtras().get("data");
-            //photoImageView.setImageBitmap(photo);
-
-            //pictureUri = getImageUri(getApplicationContext(), photo);
+            Bitmap bitmap = (Bitmap) data.getExtras().get("data");
+            photoImageView.setImageBitmap(bitmap);
 
 
-            pictureUri = data.getData();
+
             Log.i("TEST", pictureUri.toString());
 
-            //Bitmap photo = (Bitmap) data.getExtras().get("data");
-           // photoImageView.setImageBitmap(photo);
+            photoImageView.setImageBitmap(bitmap);
             photoImageView.setImageURI(pictureUri);
             photoChosen = true;
         }
         if (requestCode == RESULT_FROM_GALLERY && resultCode == RESULT_OK && null != data) {
-            pictureUri = data.getData();
-            Log.i("TEST", pictureUri.toString());
-//            String[] filePathColumn = {MediaStore.Images.Media.DATA};
-//            Cursor cursor = getContentResolver().query(selectedImage, filePathColumn, null, null, null);
-//            cursor.moveToFirst();
-//            int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
-//            String picturePath = cursor.getString(columnIndex);
-//            cursor.close();
+           Uri selectedImage = data.getData();
+            String[] filePathColumn = {MediaStore.Images.Media.DATA};
+            Cursor cursor = getContentResolver().query(selectedImage, filePathColumn, null, null, null);
+            cursor.moveToFirst();
+            int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
+            String picturePath = cursor.getString(columnIndex);
+            cursor.close();
             ImageView imageView = (ImageView) findViewById(R.id.edit_image);
-            imageView.setImageURI(pictureUri);
-           // imageView.setImageBitmap(BitmapFactory.decodeFile(picturePath));
+            bitmap = BitmapFactory.decodeFile(picturePath);
+            imageView.setImageBitmap(bitmap);
             photoChosen = true;
         }
     }
