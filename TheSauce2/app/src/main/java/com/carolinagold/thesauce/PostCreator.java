@@ -2,6 +2,7 @@ package com.carolinagold.thesauce;
 
 import android.app.Activity;
 import android.app.IntentService;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
@@ -10,6 +11,7 @@ import android.graphics.BitmapFactory;
 import android.location.Geocoder;
 import android.location.Location;
 import android.net.Uri;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.ResultReceiver;
 import android.provider.MediaStore;
@@ -19,6 +21,7 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.text.format.DateFormat;
 import android.text.format.Time;
 import android.util.Log;
 import android.view.View;
@@ -42,10 +45,13 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Transaction;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -74,6 +80,8 @@ public class PostCreator extends AppCompatActivity implements GoogleApiClient.Co
 
     private double latitude;
     private double longitude;
+
+    private File output=null;
 
     private FirebaseDatabase dbRef = FirebaseDatabase.getInstance();
 
@@ -146,7 +154,7 @@ public class PostCreator extends AppCompatActivity implements GoogleApiClient.Co
     public void onLocationChanged(Location newLocation) {
 
         Log.i("TEST", "entered onLocationChanged");
-        if(currentLocation == null) {
+
             currentLocation = newLocation;
 
             TextView locationText;
@@ -170,17 +178,10 @@ public class PostCreator extends AppCompatActivity implements GoogleApiClient.Co
 
             currentText = decodedAddress;
 
-            //currentText += String.format("%.2f %s", newLocation.getLatitude(),
-               //     newLocation.getLatitude() >= 0.0 ? "N" : "S") + "   ";
-            //currentText += String.format("%.2f %s", newLocation.getLongitude(),
-             //       newLocation.getLongitude() >= 0.0 ? "E" : "W") + "   ";
-            //if (newLocation.hasAccuracy()) {
-            //    currentText += String.format("%.2fm", newLocation.getAccuracy());
-            //}
-           // currentText += "\n\n";
+
             locationText.setText(currentText);
 
-        }
+
 
     }
 
@@ -216,54 +217,7 @@ public class PostCreator extends AppCompatActivity implements GoogleApiClient.Co
         }
         return strAdd;
     }
-<<<<<<< HEAD
-=======
-    protected void startIntentService() {
-        Log.i("TEST", "entered startIntentService");
 
-        Intent intent = new Intent(this, FetchAddressIntentService.class);
-        intent.putExtra(Constants.RECEIVER, mResultReceiver);
-        intent.putExtra(Constants.LOCATION_DATA_EXTRA, currentLocation);
-        startService(intent);
-    }
-    public void fetchAddressButtonHandler(View view) {
-        // Only start the service to fetch the address if GoogleApiClient is
-        // connected.
-        if (googleAPIClient.isConnected() && currentLocation != null) {
-            startIntentService();
-        }
-        // If GoogleApiClient isn't connected, process the user's request by
-        // setting mAddressRequested to true. Later, when GoogleApiClient connects,
-        // launch the service to fetch the address. As far as the user is
-        // concerned, pressing the Fetch Address button
-        // immediately kicks off the process of getting the address.
-
-    }
-    class AddressResultReceiver extends ResultReceiver {
-        public AddressResultReceiver(Handler handler) {
-            super(handler);
-        }
-
-        @Override
-        protected void onReceiveResult(int resultCode, Bundle resultData) {
-            Log.i("TEST", "entered onRecievedResult");
-            // Display the address string
-            // or an error message sent from the intent service.
-            decodedAddress = resultData.getString(Constants.RESULT_DATA_KEY);
-            locationTextView.setText(decodedAddress);
-
-
-            // Show a toast message if an address was found.
-            if (resultCode == Constants.SUCCESS_RESULT) {
-                Toast.makeText(PostCreator.this, R.string.address_found, Toast.LENGTH_LONG).show();
-
-            }
-
-        }
-    }
-
-
->>>>>>> 331d8aa1abb2206c68d19270fb26085fd132d7e1
 
     public void myClickHandler(View view) {
 
@@ -282,10 +236,15 @@ public class PostCreator extends AppCompatActivity implements GoogleApiClient.Co
                         })
                         .setNegativeButton(getResources().getString(R.string.choose_camera), new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int which) {
+
+
+
+
+
                                 Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                                if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
-                                    startActivityForResult(takePictureIntent, RESULT_FROM_CAMERA);
-                                }
+                               if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
+                                  startActivityForResult(takePictureIntent, RESULT_FROM_CAMERA);
+                               }
                             }
                         }).setIcon(android.R.drawable.ic_dialog_alert)
                         .show();
@@ -305,14 +264,21 @@ public class PostCreator extends AppCompatActivity implements GoogleApiClient.Co
                     String imagePath = pictureUri.toString();
 
                     Post post = new Post(uId,displayName, imagePath, strDate, decodedAddress, caption);
+                    post.pushToCloud(this);
                     
                 }
         }
     }
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == RESULT_FROM_CAMERA && resultCode == Activity.RESULT_OK) {
-            pictureUri = data.getData();
+            //Bitmap photo = (Bitmap) data.getExtras().get("data");
+            //photoImageView.setImageBitmap(photo);
 
+            //pictureUri = getImageUri(getApplicationContext(), photo);
+
+
+            pictureUri = data.getData();
+            Log.i("TEST", pictureUri.toString());
 
             //Bitmap photo = (Bitmap) data.getExtras().get("data");
            // photoImageView.setImageBitmap(photo);
@@ -321,17 +287,24 @@ public class PostCreator extends AppCompatActivity implements GoogleApiClient.Co
         }
         if (requestCode == RESULT_FROM_GALLERY && resultCode == RESULT_OK && null != data) {
             pictureUri = data.getData();
-            //String[] filePathColumn = {MediaStore.Images.Media.DATA};
-            //Cursor cursor = getContentResolver().query(selectedImage, filePathColumn, null, null, null);
-            //cursor.moveToFirst();
-           // int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
-            //String picturePath = cursor.getString(columnIndex);
-            //cursor.close();
+            Log.i("TEST", pictureUri.toString());
+//            String[] filePathColumn = {MediaStore.Images.Media.DATA};
+//            Cursor cursor = getContentResolver().query(selectedImage, filePathColumn, null, null, null);
+//            cursor.moveToFirst();
+//            int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
+//            String picturePath = cursor.getString(columnIndex);
+//            cursor.close();
             ImageView imageView = (ImageView) findViewById(R.id.edit_image);
             imageView.setImageURI(pictureUri);
-            //imageView.setImageBitmap(BitmapFactory.decodeFile(picturePath));
+           // imageView.setImageBitmap(BitmapFactory.decodeFile(picturePath));
             photoChosen = true;
         }
+    }
+    public Uri getImageUri(Context inContext, Bitmap inImage) {
+        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+        inImage.compress(Bitmap.CompressFormat.JPEG, 100, bytes);
+        String path = MediaStore.Images.Media.insertImage(inContext.getContentResolver(), inImage, "Title", null);
+        return Uri.parse(path);
     }
 
 
