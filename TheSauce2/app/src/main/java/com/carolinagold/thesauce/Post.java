@@ -40,15 +40,16 @@ public class Post extends Object implements Serializable {
     private String date;
     private String location;
     private String caption;
+    private Bitmap bitmap;
 
     public Post() {
 
     }
 
-    public Post(@NonNull String uId, String userName, @NonNull String imagePath, String date, String location, String caption) {
+    public Post(@NonNull String uId, String userName, @NonNull Bitmap bitmap, String date, String location, String caption) {
         this.uId = uId;
         this.userName = userName;
-        this.imagePath = imagePath;
+        this.bitmap = bitmap;
         this.date = date;
         this.location = location;
         this.caption = caption;
@@ -77,7 +78,7 @@ public class Post extends Object implements Serializable {
         storageRef = storageRef.child("Posts").child(uId);
 
         try {
-            Bitmap bitmap = MediaStore.Images.Media.getBitmap(context.getContentResolver(), Uri.parse(imagePath));
+            //Bitmap bitmap = MediaStore.Images.Media.getBitmap(context.getContentResolver(), Uri.parse(imagePath));
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
             byte[] data = baos.toByteArray();
