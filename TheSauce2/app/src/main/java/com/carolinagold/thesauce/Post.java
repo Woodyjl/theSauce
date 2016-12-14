@@ -40,6 +40,8 @@ public class Post extends Object implements Serializable {
     private String date;
     private String location;
     private String caption;
+    private String name;
+    private String postKey;
     private Bitmap bitmap;
 
     public Post() {
@@ -75,7 +77,7 @@ public class Post extends Object implements Serializable {
         // Create a storage reference from our app
         FirebaseStorage storage = FirebaseStorage.getInstance();
         StorageReference storageRef = storage.getReferenceFromUrl(firebase_storage_bucket_name);
-        storageRef = storageRef.child("Posts").child(uId);
+        storageRef = storageRef.child("Post").child(uId);
 
         try {
             //Bitmap bitmap = MediaStore.Images.Media.getBitmap(context.getContentResolver(), Uri.parse(imagePath));
@@ -94,18 +96,21 @@ public class Post extends Object implements Serializable {
                 public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
                     // taskSnapshot.getMetadata() contains file metadata such as size, content-type, and download URL.
                     Uri downloadUrl = taskSnapshot.getDownloadUrl();
-
+                    name = taskSnapshot.getMetadata().getName();
                     FirebaseDatabase database = FirebaseDatabase.getInstance();
 
                     // Creates a post in the real time database with paths to the image file in storage
 
                     final DatabaseReference myPostRef = database.getReference("Post");
                     final String key = myPostRef.child(uId).push().getKey();
+                    postKey = key;
                     myPostRef.child(uId).child(key).child("userName").setValue(userName);
                     myPostRef.child(uId).child(key).child("uId").setValue(uId);
                     myPostRef.child(uId).child(key).child("location").setValue(location);
                     myPostRef.child(uId).child(key).child("caption").setValue(caption);
                     myPostRef.child(uId).child(key).child("date").setValue(date);
+                    myPostRef.child(uId).child(key).child("name").setValue(name);
+                    myPostRef.child(uId).child(key).child("postKey").setValue(postKey);
                     myPostRef.child(uId).child(key).child("imagePath").setValue(downloadUrl.toString());
 
                     final DatabaseReference myUserRef = database.getReference("UserProfileInfo");
@@ -138,5 +143,36 @@ public class Post extends Object implements Serializable {
 
 
         return true;
+    }
+
+    public boolean deleteFromCloud(final Context context) {
+
+        FirebaseStorage storage = FirebaseStorage.getInstance();
+        // Create a storage reference from our app
+        StorageReference storageRef = storage.getReferenceFromUrl(firebase_storage_bucket_name);
+
+        // Create a reference to the file to delete
+        StorageReference desertRef = storageRef.child("Post").child(uId).child(name);
+
+        // Delete the file
+        desertRef.delete().addOnSuccessListener(new OnSuccessListener() {
+            @Override
+            public void onSuccess(Object o) {
+             //deletion success
+                FirebaseDatabase database = FirebaseDatabase.getInstance();
+
+                final DatabaseReference myPostRef = database.getReference("Post");
+                myPostRef.child(postKey).removeValue();
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception exception) {
+                // Uh-oh, an error occurred!
+                Log.i(Logs.POINT_OF_INTEREST, "Error deleting");
+                Toast.makeText(context, "Error Deleting File", Toast.LENGTH_LONG);
+                exception.printStackTrace();
+            }
+        });
+        return  true;
     }
 }

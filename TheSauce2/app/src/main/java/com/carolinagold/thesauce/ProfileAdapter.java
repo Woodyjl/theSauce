@@ -63,17 +63,33 @@ public class ProfileAdapter extends RecyclerView.Adapter<ProfileAdapter.ViewHold
 
     // Involves populating data into the item through holder
     @Override
-    public void onBindViewHolder(ProfileAdapter.ViewHolder viewHolder, int position) {
+    public void onBindViewHolder(ProfileAdapter.ViewHolder viewHolder, final int position) {
         if (posts != null) {
             // Get the data model based on position
-            Post post = posts.get(position);
+            Post post = posts.get((posts.size() - 1) - position);
 
             // Set item views based on your views and data model
             Picasso.with(context).load(post.getImagePath()).into(viewHolder.imageView);
 
+            viewHolder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+
+                    delete(position);
+                    return true;
+                }
+            });
+
         } else {
             //Implement some default design
         }
+    }
+
+    private void delete(int position) {
+        Post post = posts.get((posts.size() - 1) - position);
+        posts.remove((posts.size() - 1) - position);
+        post.deleteFromCloud(context);
+        notifyDataSetChanged();
     }
 
     // Returns the total count of items in the list

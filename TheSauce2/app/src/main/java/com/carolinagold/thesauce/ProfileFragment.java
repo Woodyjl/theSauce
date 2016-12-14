@@ -32,7 +32,7 @@ import java.util.List;
 
 
 
-public class ProfileFragment extends Fragment {
+public class ProfileFragment extends Fragment implements View.OnLongClickListener {
 
     RecyclerView recyclerView;
 
@@ -180,5 +180,10 @@ public class ProfileFragment extends Fragment {
     public void onDetach() {
         super.onDetach();
         mListener = null;
+    }
+
+    @Override
+    public boolean onLongClick(View view) {
+        return false;
     }
 }
