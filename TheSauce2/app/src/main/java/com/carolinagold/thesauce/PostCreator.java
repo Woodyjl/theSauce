@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.IntentService;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -50,8 +51,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
+import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
+import static android.Manifest.permission_group.CAMERA;
+import static android.Manifest.permission_group.STORAGE;
+
 public class PostCreator extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks,
-        GoogleApiClient.OnConnectionFailedListener,LocationListener {
+        GoogleApiClient.OnConnectionFailedListener,LocationListener, PermissionHandler.PermissionsCallBack {
 
 
     private String uId;
@@ -96,6 +101,8 @@ public class PostCreator extends AppCompatActivity implements GoogleApiClient.Co
         googleAPIClient = new GoogleApiClient.Builder(this).
                 addConnectionCallbacks(this).addOnConnectionFailedListener(this).
                 addApi(LocationServices.API).build();
+        String array[] = {READ_EXTERNAL_STORAGE, CAMERA};
+        new PermissionHandler(this, this, array);
 
     }
     public void onStart() {
@@ -216,54 +223,6 @@ public class PostCreator extends AppCompatActivity implements GoogleApiClient.Co
         }
         return strAdd;
     }
-<<<<<<< HEAD
-=======
-    protected void startIntentService() {
-        Log.i("TEST", "entered startIntentService");
-
-        Intent intent = new Intent(this, FetchAddressIntentService.class);
-        intent.putExtra(Constants.RECEIVER, mResultReceiver);
-        intent.putExtra(Constants.LOCATION_DATA_EXTRA, currentLocation);
-        startService(intent);
-    }
-    public void fetchAddressButtonHandler(View view) {
-        // Only start the service to fetch the address if GoogleApiClient is
-        // connected.
-        if (googleAPIClient.isConnected() && currentLocation != null) {
-            startIntentService();
-        }
-        // If GoogleApiClient isn't connected, process the user's request by
-        // setting mAddressRequested to true. Later, when GoogleApiClient connects,
-        // launch the service to fetch the address. As far as the user is
-        // concerned, pressing the Fetch Address button
-        // immediately kicks off the process of getting the address.
-
-    }
-    class AddressResultReceiver extends ResultReceiver {
-        public AddressResultReceiver(Handler handler) {
-            super(handler);
-        }
-
-        @Override
-        protected void onReceiveResult(int resultCode, Bundle resultData) {
-            Log.i("TEST", "entered onRecievedResult");
-            // Display the address string
-            // or an error message sent from the intent service.
-            decodedAddress = resultData.getString(Constants.RESULT_DATA_KEY);
-            locationTextView.setText(decodedAddress);
-
-
-            // Show a toast message if an address was found.
-            if (resultCode == Constants.SUCCESS_RESULT) {
-                Toast.makeText(PostCreator.this, R.string.address_found, Toast.LENGTH_LONG).show();
-
-            }
-
-        }
-    }
-
-
->>>>>>> 331d8aa1abb2206c68d19270fb26085fd132d7e1
 
     public void myClickHandler(View view) {
 
@@ -276,15 +235,19 @@ public class PostCreator extends AppCompatActivity implements GoogleApiClient.Co
                         .setPositiveButton(getResources().getString(R.string.choose_gallery), new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int which) {
                                 Intent galleryIntent;
-                                galleryIntent = new Intent(Intent.ACTION_PICK,android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-                                startActivityForResult(galleryIntent, RESULT_FROM_GALLERY);
+                                if(haveStoragePermission) {
+                                    galleryIntent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                                    startActivityForResult(galleryIntent, RESULT_FROM_GALLERY);
+                                }
                             }
                         })
                         .setNegativeButton(getResources().getString(R.string.choose_camera), new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int which) {
-                                Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                                if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
-                                    startActivityForResult(takePictureIntent, RESULT_FROM_CAMERA);
+                                if (haveCameraPermission) {
+                                    Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                                    if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
+                                        startActivityForResult(takePictureIntent, RESULT_FROM_CAMERA);
+                                    }
                                 }
                             }
                         }).setIcon(android.R.drawable.ic_dialog_alert)
@@ -334,6 +297,21 @@ public class PostCreator extends AppCompatActivity implements GoogleApiClient.Co
         }
     }
 
+    boolean haveCameraPermission = false;
+    boolean haveStoragePermission = false;
 
 
+    @Override
+    public void resultFromRequest(String permission, Integer granted) {
+        switch (permission) {
+            case CAMERA:
+                if(granted == PackageManager.PERMISSION_GRANTED)
+                    haveCameraPermission = true;
+
+                break;
+            case READ_EXTERNAL_STORAGE:
+                if (granted == PackageManager.PERMISSION_GRANTED)
+                    haveStoragePermission = true;
+        }
+    }
 }

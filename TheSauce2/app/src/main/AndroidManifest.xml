@@ -28,8 +28,7 @@
             android:label="@string/title_activity_login" />
         <activity android:name=".SignUpActivity" />
         <activity android:name=".PostCreator"></activity>
-        <service android:name=".FetchAddressIntentService"
-            android:exported="false"/>
+
     </application>
 
 </manifest>
