@@ -48,7 +48,6 @@ public class ProfileFragment extends Fragment implements View.OnLongClickListene
 
     public ProfileFragment() {
         // Required empty public constructor
-
     }
 
 
@@ -97,41 +96,44 @@ public class ProfileFragment extends Fragment implements View.OnLongClickListene
 
 
     public void getAllProfilePost() {
-        FirebaseDatabase dbRef = FirebaseDatabase.getInstance();
-        DatabaseReference myRef = dbRef.getReference("Post").child(user.getUid());
+        if (user != null) {
+            FirebaseDatabase dbRef = FirebaseDatabase.getInstance();
+            DatabaseReference myRef = dbRef.getReference("Post").child(user.getUid());
 
-        ((MainActivity) getActivity()).showProgress(true);
-        final ProfileAdapter adaptor = (ProfileAdapter) recyclerView.getAdapter();
-        myRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
+            ((MainActivity) getActivity()).showProgress(true);
+            final ProfileAdapter adaptor = (ProfileAdapter) recyclerView.getAdapter();
+            myRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
 
-                List<Post> listOfPosts = new ArrayList<Post>();
+                    List<Post> listOfPosts = new ArrayList<Post>();
 
-                for (DataSnapshot postByUser : dataSnapshot.getChildren()) {
-                    Log.i(Logs.POINT_OF_INTEREST, "In Profile fragment!!!");
-                    System.out.println(postByUser);
+                    for (DataSnapshot postByUser : dataSnapshot.getChildren()) {
+                        Log.i(Logs.POINT_OF_INTEREST, "In Profile fragment!!!");
+                        System.out.println(postByUser);
 
-                    listOfPosts.add(postByUser.getValue(Post.class));
+                        listOfPosts.add(postByUser.getValue(Post.class));
 
-                }
-                Collections.sort(listOfPosts, new Comparator<Post>() {
-                    @Override
-                    public int compare(Post post, Post t1) {
-                        return post.getName().compareTo(t1.getName());
                     }
-                });
-                ((MainActivity) getActivity()).showProgress(false);
-                adaptor.updateProfileGallery(listOfPosts);
-                adaptor.notifyDataSetChanged();
-            }
+                    Collections.sort(listOfPosts, new Comparator<Post>() {
+                        @Override
+                        public int compare(Post post, Post t1) {
+                            return post.getName().compareTo(t1.getName());
+                        }
+                    });
+                    Log.i(Logs.POINT_OF_INTEREST, "In Profile Fragment trying to get profile images");
+                    ((MainActivity) getActivity()).showProgress(false);
+                    adaptor.updateProfileGallery(listOfPosts);
+                    adaptor.notifyDataSetChanged();
+                }
 
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                Log.i(Logs.POINT_OF_INTEREST, "Failed retrieving data from firebase from method: getLatestPost");
-                ((MainActivity) getActivity()).showProgress(false);
-            }
-        });
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+                    Log.i(Logs.POINT_OF_INTEREST, "Failed retrieving data from firebase from method: getLatestPost");
+                    ((MainActivity) getActivity()).showProgress(false);
+                }
+            });
+        }
     }
 
     private void setUpTopView() {

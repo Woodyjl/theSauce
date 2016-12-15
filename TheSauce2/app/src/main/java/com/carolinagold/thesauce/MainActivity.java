@@ -121,9 +121,10 @@ public class MainActivity extends AppCompatActivity implements OnFragmentInterac
         setupViewPager(mViewPager);
 
         tabLayout = (TabLayout) findViewById(R.id.tabs);
+        tabLayout.setupWithViewPager(mViewPager);
         tabLayout.setOnTabSelectedListener(tabSelectedListener);
         //tabLayout.setOnTabSelectedListener();
-        tabLayout.setupWithViewPager(mViewPager);
+
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -174,10 +175,14 @@ public class MainActivity extends AppCompatActivity implements OnFragmentInterac
     TabLayout.OnTabSelectedListener tabSelectedListener = new TabLayout.OnTabSelectedListener() {
         @Override
         public void onTabSelected(TabLayout.Tab tab) {
-            if(tab.getContentDescription().equals("Profile")) {
+            Log.i(Logs.POINT_OF_INTEREST,  "In tab listener");
+            mViewPager.setCurrentItem(tab.getPosition());
+            if(tab.getPosition() == 1) {
                 onProfileFrag = true;
+                profileFragment.getAllProfilePost();
             } else {
                 onProfileFrag = false;
+                newFeedFragment.getLatestPost();
             }
         }
 
