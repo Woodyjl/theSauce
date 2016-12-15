@@ -307,7 +307,6 @@ public class PostCreator extends AppCompatActivity implements GoogleApiClient.Co
                 if(!photoChosen) {
                     Toast.makeText(this,"Pick a photo!",Toast.LENGTH_LONG).show();
                     postButton.setClickable(true);
-
                 }
                 else {
 
@@ -320,7 +319,12 @@ public class PostCreator extends AppCompatActivity implements GoogleApiClient.Co
 
                     Post post = new Post(uId,displayName, bitmap, strDate, decodedAddress, caption);
                     post.pushToCloud(this);
-                    startActivity(new Intent(PostCreator.this, MainActivity.class));
+
+                    setResult(RESULT_OK);
+                    finish();
+                    //startActivity(new Intent(PostCreator.this, MainActivity.class));
+
+
 
                 }
         }
