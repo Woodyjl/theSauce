@@ -110,9 +110,9 @@ public class ProfileFragment extends Fragment implements View.OnLongClickListene
                     Log.i(Logs.POINT_OF_INTEREST, "In Profile fragment!!!");
                     System.out.println(postByUser);
 
-                    for(int i = 0; i < 5; i++) {
-                        listOfPosts.add(postByUser.getValue(Post.class));
-                    }
+
+                    listOfPosts.add(postByUser.getValue(Post.class));
+
 
                 }
                 ((MainActivity) getActivity()).showProgress(false);

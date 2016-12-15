@@ -68,7 +68,7 @@ public class NewsFeedAdaptor extends RecyclerView.Adapter<NewsFeedAdaptor.PostVi
     public void onBindViewHolder(NewsFeedAdaptor.PostViewHolder viewHolder, int position) {
         if (posts != null) {
             // Get the data model based on position
-            Post post = posts.get(position);
+            Post post = posts.get((posts.size() - 1) - position);
 
             // Set item views based on your views and data model
             Picasso.with(context).load(post.getUserProfilePicturePath()).into(viewHolder.userProfilePicture);

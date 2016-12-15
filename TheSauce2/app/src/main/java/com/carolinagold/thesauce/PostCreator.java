@@ -121,9 +121,9 @@ public class PostCreator extends AppCompatActivity implements GoogleApiClient.Co
 
        //new PermissionHandler(PostCreator.this, PostCreator.this, array);
 
-        ActivityCompat.requestPermissions(PostCreator.this,
-                new String[]{android.Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.CAMERA},
-                1);
+//        ActivityCompat.requestPermissions(PostCreator.this,
+//                new String[]{android.Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.CAMERA},
+//                1);
     }
     @Override
     public void onRequestPermissionsResult(int requestCode,
@@ -192,7 +192,7 @@ public class PostCreator extends AppCompatActivity implements GoogleApiClient.Co
             LocationServices.FusedLocationApi.requestLocationUpdates(
                     googleAPIClient,locationRequest,this);
         } catch (SecurityException e) {
-            Toast.makeText(this,"Cannot get updates",Toast.LENGTH_LONG).show();
+            Toast.makeText(this,"Cannot get location updates, please enable",Toast.LENGTH_LONG).show();
             finish();
         }
 
