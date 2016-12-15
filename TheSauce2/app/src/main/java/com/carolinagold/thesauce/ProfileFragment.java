@@ -96,7 +96,6 @@ public class ProfileFragment extends Fragment implements View.OnLongClickListene
 
 
     public void getAllProfilePost() {
-        if (user != null) {
             FirebaseDatabase dbRef = FirebaseDatabase.getInstance();
             DatabaseReference myRef = dbRef.getReference("Post").child(user.getUid());
 
@@ -133,12 +132,13 @@ public class ProfileFragment extends Fragment implements View.OnLongClickListene
                     ((MainActivity) getActivity()).showProgress(false);
                 }
             });
-        }
+        
     }
 
     private void setUpTopView() {
 
         FirebaseDatabase dbRef = FirebaseDatabase.getInstance();
+        Log.i(Logs.POINT_OF_INTEREST, user.getUid());
         DatabaseReference myRef = dbRef.getReference("userProfileInfo").child(user.getUid());
 
         ((MainActivity) getActivity()).showProgress(true);

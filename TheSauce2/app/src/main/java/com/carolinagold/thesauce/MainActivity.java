@@ -43,6 +43,7 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements OnFragmentInteractionListener {
 
+    private static final int LOGIN_ACTIVITY = 0;
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide
      * fragments for each of the sections. We use a
@@ -78,7 +79,7 @@ public class MainActivity extends AppCompatActivity implements OnFragmentInterac
 
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
@@ -94,13 +95,14 @@ public class MainActivity extends AppCompatActivity implements OnFragmentInterac
                     user is signed in, stay in the main activity
                      */
                     Log.d(TAG, "onAuthStateChanged:signed_in:" + user.getUid());
+
                 }
                 else {
                     /*
                     user is signed out, take them to the login screen
                      */
                     Log.d(TAG, "onAuthStateChanged:signed_out");
-                    startActivity(new Intent(MainActivity.this, LoginActivity.class));
+                    startActivityForResult(new Intent(MainActivity.this, LoginActivity.class), LOGIN_ACTIVITY);
                 }
             }
 
@@ -166,24 +168,30 @@ public class MainActivity extends AppCompatActivity implements OnFragmentInterac
                     }
 
                 }
+                break;
+            case LOGIN_ACTIVITY:
+                recreate();
+                break;
         }
 
     }
 
     boolean onProfileFrag = false;
+    int counter = 0;
 
     TabLayout.OnTabSelectedListener tabSelectedListener = new TabLayout.OnTabSelectedListener() {
         @Override
         public void onTabSelected(TabLayout.Tab tab) {
             Log.i(Logs.POINT_OF_INTEREST,  "In tab listener");
             mViewPager.setCurrentItem(tab.getPosition());
-            if(tab.getPosition() == 1) {
+            if(tab.getPosition() == 1 && counter > 1) {
                 onProfileFrag = true;
                 profileFragment.getAllProfilePost();
-            } else {
+            } else if (counter > 1) {
                 onProfileFrag = false;
                 newFeedFragment.getLatestPost();
             }
+            counter++;
         }
 
         @Override
