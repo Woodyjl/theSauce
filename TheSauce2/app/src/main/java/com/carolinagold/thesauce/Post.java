@@ -1,5 +1,6 @@
 package com.carolinagold.thesauce;
 
+import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.net.Uri;
@@ -72,7 +73,7 @@ public class Post extends Object implements Serializable {
 
     public String getCaption() {return caption;}
 
-    public boolean pushToCloud(Context context) {
+    public boolean pushToCloud(final Context context) {
 
         // Will store the profile image and post image in storage
         // Create a storage reference from our app
@@ -123,6 +124,9 @@ public class Post extends Object implements Serializable {
 
                             String profileImagePath = dataSnapshot.getValue(String.class);
                             myPostRef.child(uId).child(key).child("userProfilePicturePath").setValue(profileImagePath);
+
+                            PostCreator postCreator = (PostCreator) context;
+                            postCreator.donePosting();
                         }
 
                         @Override
