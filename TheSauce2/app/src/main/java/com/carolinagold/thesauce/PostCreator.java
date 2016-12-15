@@ -302,7 +302,7 @@ public class PostCreator extends AppCompatActivity implements GoogleApiClient.Co
                 break;
             case R.id.post_button:
 
-                Button postButton = (Button)findViewById(R.id.button);
+                Button postButton = (Button)findViewById(R.id.post_button);
                 postButton.setClickable(false);
                 if(!photoChosen) {
                     Toast.makeText(this,"Pick a photo!",Toast.LENGTH_LONG).show();
