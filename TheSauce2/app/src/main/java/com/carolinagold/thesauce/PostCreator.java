@@ -29,6 +29,7 @@ import android.text.format.DateFormat;
 import android.text.format.Time;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -300,8 +301,13 @@ public class PostCreator extends AppCompatActivity implements GoogleApiClient.Co
                         .show();
                 break;
             case R.id.post_button:
+
+                Button postButton = (Button)findViewById(R.id.button);
+                postButton.setClickable(false);
                 if(!photoChosen) {
                     Toast.makeText(this,"Pick a photo!",Toast.LENGTH_LONG).show();
+                    postButton.setClickable(true);
+
                 }
                 else {
 
@@ -314,7 +320,8 @@ public class PostCreator extends AppCompatActivity implements GoogleApiClient.Co
 
                     Post post = new Post(uId,displayName, bitmap, strDate, decodedAddress, caption);
                     post.pushToCloud(this);
-                    
+                    startActivity(new Intent(PostCreator.this, MainActivity.class));
+
                 }
         }
     }
