@@ -52,11 +52,8 @@
                 <android.support.v7.widget.RecyclerView
                     android:id="@+id/profile_fragment_recycler_grid"
                     android:layout_width="match_parent"
-<<<<<<< HEAD
                     android:layout_height="match_parent">
-=======
-                    android:layout_height="487dp">
->>>>>>> b97c10c85226d7d8148efd4483482db9009ac410
+
                 </android.support.v7.widget.RecyclerView>
 
             </LinearLayout>
