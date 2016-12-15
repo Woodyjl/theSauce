@@ -90,7 +90,7 @@ public class Post extends Object implements Serializable {
             //Bitmap bitmap = MediaStore.Images.Media.getBitmap(context.getContentResolver(), Uri.parse(imagePath));
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
-            byte[] data = baos.toByteArray();
+            final byte[] data = baos.toByteArray();
 
             UploadTask uploadTask = storageRef.putBytes(data);
             uploadTask.addOnFailureListener(new OnFailureListener() {
@@ -111,7 +111,6 @@ public class Post extends Object implements Serializable {
                     final DatabaseReference myPostRef = database.getReference("Post");
                     final String key = myPostRef.push().getKey();
                     postKey = key;
-                    myPostRef.child(uId).child(key).child("userName").setValue(userName);
                     myPostRef.child(uId).child(key).child("uId").setValue(uId);
                     myPostRef.child(uId).child(key).child("location").setValue(location);
                     myPostRef.child(uId).child(key).child("caption").setValue(caption);
@@ -120,14 +119,28 @@ public class Post extends Object implements Serializable {
                     myPostRef.child(uId).child(key).child("postKey").setValue(postKey);
                     myPostRef.child(uId).child(key).child("imagePath").setValue(downloadUrl.toString());
 
-                    DatabaseReference myUserProfileInfoRef = database.getReference("userProfileInfo").child(uId).child("userProfilePicturePath");
+                    DatabaseReference myUserProfileInfoRef = database.getReference("userProfileInfo").child(uId);
 
                     myUserProfileInfoRef.addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
                         public void onDataChange(DataSnapshot dataSnapshot) {
 
-                            String profileImagePath = dataSnapshot.getValue(String.class);
-                            myPostRef.child(uId).child(key).child("userProfilePicturePath").setValue(profileImagePath);
+                            for (DataSnapshot userInfo : dataSnapshot.getChildren()) {
+                                Log.i(Logs.POINT_OF_INTEREST, "In post!!!");
+
+                                String str = dataSnapshot.getKey();
+
+                                switch (str) {
+                                    case "userProfilePicturePath":
+                                        String profileImagePath = dataSnapshot.getValue(String.class);
+                                        myPostRef.child(uId).child(key).child("userProfilePicturePath").setValue(profileImagePath);
+                                        break;
+                                    case "userName":
+                                        String uName = dataSnapshot.getValue(String.class);
+                                        myPostRef.child(uId).child(key).child("userName").setValue(uName);
+                                }
+
+                            }
 
                             PostCreator postCreator = (PostCreator) context;
                             postCreator.donePosting();
