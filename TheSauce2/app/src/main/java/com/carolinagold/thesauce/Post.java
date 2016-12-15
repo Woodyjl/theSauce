@@ -77,7 +77,7 @@ public class Post extends Object implements Serializable {
         // Create a storage reference from our app
         FirebaseStorage storage = FirebaseStorage.getInstance();
         StorageReference storageRef = storage.getReferenceFromUrl(firebase_storage_bucket_name);
-        storageRef = storageRef.child("Post").child(uId);
+        storageRef = storageRef.child("Post");
 
         try {
             //Bitmap bitmap = MediaStore.Images.Media.getBitmap(context.getContentResolver(), Uri.parse(imagePath));
