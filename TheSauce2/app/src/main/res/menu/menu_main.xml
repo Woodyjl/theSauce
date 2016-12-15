@@ -12,4 +12,9 @@
         android:orderInCategory="101"
         android:title="@string/action_logout"
         app:showAsAction="never" />
+    <item
+        android:id="@+id/refresh"
+        android:orderInCategory="102"
+        android:title="refresh"
+        app:showAsAction="never" />
 </menu>

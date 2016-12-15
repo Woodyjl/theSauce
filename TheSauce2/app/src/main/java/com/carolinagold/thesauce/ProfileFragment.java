@@ -94,7 +94,7 @@ public class ProfileFragment extends Fragment implements View.OnLongClickListene
     }
 
 
-    private void getAllProfilePost() {
+    public void getAllProfilePost() {
         FirebaseDatabase dbRef = FirebaseDatabase.getInstance();
         DatabaseReference myRef = dbRef.getReference("Post").child(user.getUid());
 

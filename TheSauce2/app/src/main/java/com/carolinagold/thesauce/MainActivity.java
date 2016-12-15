@@ -319,6 +319,10 @@ public class MainActivity extends AppCompatActivity implements OnFragmentInterac
                 };
 
                 return true;
+            case R.id.refresh:
+                newFeedFragment.getLatestPost();
+                profileFragment.getAllProfilePost();
+                break;
             default:
                 break;
         }
