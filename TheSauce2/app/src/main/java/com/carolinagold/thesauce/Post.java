@@ -23,6 +23,7 @@ import com.google.firebase.storage.UploadTask;
 import java.io.ByteArrayOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 /**
@@ -77,7 +78,8 @@ public class Post extends Object implements Serializable {
         // Create a storage reference from our app
         FirebaseStorage storage = FirebaseStorage.getInstance();
         StorageReference storageRef = storage.getReferenceFromUrl(firebase_storage_bucket_name);
-        storageRef = storageRef.child("Post");
+        Calendar calendar = Calendar.getInstance();
+        storageRef = storageRef.child("Post").child(uId).child(Long.toString(calendar.getTimeInMillis()));
 
         try {
             //Bitmap bitmap = MediaStore.Images.Media.getBitmap(context.getContentResolver(), Uri.parse(imagePath));
