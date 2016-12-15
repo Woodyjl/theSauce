@@ -73,15 +73,13 @@ public class Post extends Object implements Serializable {
 
     public String getCaption() {return caption;}
 
-<<<<<<< HEAD
-    public String getName() {return name;}
+   public String getName() {return name;}
 
     public String getPostKey() {return postKey;}
 
-    public boolean pushToCloud(Context context) {
-=======
+
     public boolean pushToCloud(final Context context) {
->>>>>>> b97c10c85226d7d8148efd4483482db9009ac410
+
 
         // Will store the profile image and post image in storage
         // Create a storage reference from our app
@@ -133,11 +131,9 @@ public class Post extends Object implements Serializable {
                             String profileImagePath = dataSnapshot.getValue(String.class);
                             myPostRef.child(uId).child(key).child("userProfilePicturePath").setValue(profileImagePath);
 
-<<<<<<< HEAD
-=======
+
                             PostCreator postCreator = (PostCreator) context;
                             postCreator.donePosting();
->>>>>>> b97c10c85226d7d8148efd4483482db9009ac410
                         }
 
                         @Override

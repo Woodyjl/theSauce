@@ -10,7 +10,7 @@
                 android:id="@+id/profile_fragment_linear_layout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="#ffffff"
+                android:background="@color/news_feed_post_bg_color"
                 android:orientation="horizontal">
 
                 <ImageView
@@ -26,7 +26,7 @@
                     android:textColor="#000000"
                     android:paddingTop="10dp"
                     android:layout_alignParentRight="true"
-                    android:paddingLeft="10dp"
+                    android:paddingLeft="0dp"
                     android:layout_height="50dp" />
 
                 <TextView
@@ -52,11 +52,9 @@
                 <android.support.v7.widget.RecyclerView
                     android:id="@+id/profile_fragment_recycler_grid"
                     android:layout_width="match_parent"
-<<<<<<< HEAD
+
                     android:layout_height="match_parent">
-=======
-                    android:layout_height="487dp">
->>>>>>> b97c10c85226d7d8148efd4483482db9009ac410
+
                 </android.support.v7.widget.RecyclerView>
 
             </LinearLayout>
