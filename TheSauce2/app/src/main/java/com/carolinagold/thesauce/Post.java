@@ -80,7 +80,7 @@ public class Post extends Object implements Serializable {
 
         // Will store the profile image and post image in storage
         // Create a storage reference from our app
-        FirebaseStorage storage = FirebaseStorage.getInstance();
+        final FirebaseStorage storage = FirebaseStorage.getInstance();
         StorageReference storageRef = storage.getReferenceFromUrl(firebase_storage_bucket_name);
         Calendar calendar = Calendar.getInstance();
         storageRef = storageRef.child("Post").child(uId).child(Long.toString(calendar.getTimeInMillis()));
@@ -119,14 +119,15 @@ public class Post extends Object implements Serializable {
                     myPostRef.child(uId).child(key).child("postKey").setValue(postKey);
                     myPostRef.child(uId).child(key).child("imagePath").setValue(downloadUrl.toString());
 
-                    final DatabaseReference myUserRef = database.getReference("UserProfileInfo");
+                    DatabaseReference myUserProfileInfoRef = database.getReference("userProfileInfo").child(uId).child("userProfilePicturePath");
 
-                    myUserRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                    myUserProfileInfoRef.addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
                         public void onDataChange(DataSnapshot dataSnapshot) {
 
                             String profileImagePath = dataSnapshot.getValue(String.class);
                             myPostRef.child(uId).child(key).child("userProfilePicturePath").setValue(profileImagePath);
+
                         }
 
                         @Override
@@ -136,6 +137,9 @@ public class Post extends Object implements Serializable {
 
 
                     });
+
+
+
                 }
             });
         } catch (Exception e) {
