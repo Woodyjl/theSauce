@@ -121,6 +121,7 @@ public class MainActivity extends AppCompatActivity implements OnFragmentInterac
         setupViewPager(mViewPager);
 
         tabLayout = (TabLayout) findViewById(R.id.tabs);
+        tabLayout.setOnTabSelectedListener(tabSelectedListener);
         //tabLayout.setOnTabSelectedListener();
         tabLayout.setupWithViewPager(mViewPager);
 
@@ -168,10 +169,16 @@ public class MainActivity extends AppCompatActivity implements OnFragmentInterac
 
     }
 
+    boolean onProfileFrag = false;
+
     TabLayout.OnTabSelectedListener tabSelectedListener = new TabLayout.OnTabSelectedListener() {
         @Override
         public void onTabSelected(TabLayout.Tab tab) {
-            //tab.
+            if(tab.getContentDescription().equals("Profile")) {
+                onProfileFrag = true;
+            } else {
+                onProfileFrag = false;
+            }
         }
 
         @Override
@@ -320,8 +327,13 @@ public class MainActivity extends AppCompatActivity implements OnFragmentInterac
 
                 return true;
             case R.id.refresh:
-                newFeedFragment.getLatestPost();
-                profileFragment.getAllProfilePost();
+                if (onProfileFrag) {
+                    profileFragment.getAllProfilePost();
+                } else {
+                    newFeedFragment.getLatestPost();
+                }
+
+
                 break;
             default:
                 break;

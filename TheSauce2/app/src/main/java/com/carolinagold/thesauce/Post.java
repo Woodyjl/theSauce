@@ -171,7 +171,7 @@ public class Post extends Object implements Serializable {
              //deletion success
                 FirebaseDatabase database = FirebaseDatabase.getInstance();
 
-                final DatabaseReference myPostRef = database.getReference("Post");
+                final DatabaseReference myPostRef = database.getReference("Post").child(uId);
                 myPostRef.child(postKey).removeValue();
             }
         }).addOnFailureListener(new OnFailureListener() {
