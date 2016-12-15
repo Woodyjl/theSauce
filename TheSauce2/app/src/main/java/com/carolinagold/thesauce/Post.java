@@ -60,7 +60,7 @@ public class Post extends Object implements Serializable {
 
     public String getUserProfilePicturePath() {return userProfilePicturePath;}
 
-    public String getUserId() {return uId;}
+    public String getuId() {return uId;}
 
     public String getUserName() {return userName;}
 
@@ -71,6 +71,10 @@ public class Post extends Object implements Serializable {
     public String getLocation() {return location;}
 
     public String getCaption() {return caption;}
+
+    public String getName() {return name;}
+
+    public String getPostKey() {return postKey;}
 
     public boolean pushToCloud(Context context) {
 

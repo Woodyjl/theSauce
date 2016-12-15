@@ -28,6 +28,8 @@ import com.google.firebase.database.ValueEventListener;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 
@@ -115,6 +117,12 @@ public class ProfileFragment extends Fragment implements View.OnLongClickListene
 
 
                 }
+                Collections.sort(listOfPosts, new Comparator<Post>() {
+                    @Override
+                    public int compare(Post post, Post t1) {
+                        return post.getName().compareTo(t1.getName());
+                    }
+                });
                 ((MainActivity) getActivity()).showProgress(false);
                 adaptor.updateProfileGallery(listOfPosts);
                 adaptor.notifyDataSetChanged();

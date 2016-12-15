@@ -4,6 +4,7 @@ import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
 //import android.app.Fragment;
+import android.support.v7.util.SortedList;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -19,6 +20,8 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 
@@ -82,6 +85,12 @@ public class NewFeedFragment extends Fragment {
 
                     //System.out.println("child: " + post.getChildren());
                 }
+                Collections.sort(listOfPosts, new Comparator<Post>() {
+                    @Override
+                    public int compare(Post post, Post t1) {
+                        return post.getName().compareTo(t1.getName());
+                    }
+                });
                 ((MainActivity) getActivity()).showProgress(false);
                 adaptor.updateFeedList(listOfPosts);
                 adaptor.notifyDataSetChanged();
