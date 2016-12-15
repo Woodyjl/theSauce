@@ -73,11 +73,13 @@ public class Post extends Object implements Serializable {
 
     public String getCaption() {return caption;}
 
-    public String getName() {return name;}
+   public String getName() {return name;}
 
     public String getPostKey() {return postKey;}
 
+
     public boolean pushToCloud(final Context context) {
+
 
         // Will store the profile image and post image in storage
         // Create a storage reference from our app
@@ -141,6 +143,7 @@ public class Post extends Object implements Serializable {
                                 }
 
                             }
+
 
                             PostCreator postCreator = (PostCreator) context;
                             postCreator.donePosting();
