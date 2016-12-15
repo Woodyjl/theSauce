@@ -320,7 +320,7 @@ public class PostCreator extends AppCompatActivity implements GoogleApiClient.Co
     }
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == RESULT_FROM_CAMERA && resultCode == Activity.RESULT_OK) {
-            Bitmap bitmap = (Bitmap) data.getExtras().get("data");
+            bitmap = (Bitmap) data.getExtras().get("data");
             photoImageView.setImageBitmap(bitmap);
 
 
