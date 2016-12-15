@@ -320,8 +320,7 @@ public class PostCreator extends AppCompatActivity implements GoogleApiClient.Co
                     Post post = new Post(uId,displayName, bitmap, strDate, decodedAddress, caption);
                     post.pushToCloud(this);
 
-                    setResult(RESULT_OK);
-                    finish();
+
                     //startActivity(new Intent(PostCreator.this, MainActivity.class));
 
 
@@ -329,6 +328,12 @@ public class PostCreator extends AppCompatActivity implements GoogleApiClient.Co
                 }
         }
     }
+    public void donePosting() {
+        setResult(RESULT_OK);
+        finish();
+    }
+
+
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == RESULT_FROM_CAMERA && resultCode == Activity.RESULT_OK) {
             bitmap = (Bitmap) data.getExtras().get("data");
