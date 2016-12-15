@@ -101,7 +101,7 @@ public class Post extends Object implements Serializable {
 
                     // Creates a post in the real time database with paths to the image file in storage
 
-                    final DatabaseReference myPostRef = database.getReference("Post").child(uId);
+                    final DatabaseReference myPostRef = database.getReference("Post");
                     final String key = myPostRef.push().getKey();
                     postKey = key;
                     myPostRef.child(uId).child(key).child("userName").setValue(userName);
