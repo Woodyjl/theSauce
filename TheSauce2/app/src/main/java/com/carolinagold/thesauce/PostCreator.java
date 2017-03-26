@@ -315,7 +315,7 @@ public class PostCreator extends AppCompatActivity implements GoogleApiClient.Co
                     SimpleDateFormat mdformat = new SimpleDateFormat("yyyy / MM / dd ");
                     String strDate = "Current Date : " + mdformat.format(calendar.getTime());
 
-                    caption = (String)((EditText)findViewById(R.id.caption_text)).getText().toString();
+                    caption = ((EditText)findViewById(R.id.caption_text)).getText().toString();
 
                     Post post = new Post(uId,displayName, bitmap, strDate, decodedAddress, caption);
                     post.pushToCloud(this);

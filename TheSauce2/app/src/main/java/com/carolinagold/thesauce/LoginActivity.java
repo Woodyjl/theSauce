@@ -53,12 +53,6 @@ import static android.Manifest.permission.READ_CONTACTS;
  */
 public class LoginActivity extends AppCompatActivity {
 
-    /**
-     * A dummy authentication store containing known user names and passwords.
-     * private final String loginName = "johndoe@gmail.com";
-       private final String loginPass = "123123";
-     * TODO: remove after connecting to a real authentication system.
-     */
     private static final String[] DUMMY_CREDENTIALS = new String[]{
             "johndoe@gmail.com", "123123"
     };
@@ -76,8 +70,6 @@ public class LoginActivity extends AppCompatActivity {
 
     //google database objects
     private FirebaseAuth mAuth;
-    //keeps track of user logging in or out
-    private FirebaseAuth.AuthStateListener mAuthListener;
     //tag for Log statements for debugging
     private String TAG = "LoginActivity";
     boolean mAuthTask = false;
@@ -110,37 +102,11 @@ public class LoginActivity extends AppCompatActivity {
 
         mLoginFormView = findViewById(R.id.login_form);
         mProgressView = findViewById(R.id.login_progress);
-        showProgress(true);
+        //showProgress(true);
 
 
-        //gets a Firebase Authenticator
-        mAuth = FirebaseAuth.getInstance();
-        //tracks when user signs in or out
-        mAuthListener = new FirebaseAuth.AuthStateListener() {
-            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
-                //gets the user to see if he is signed in or not
-                FirebaseUser user = firebaseAuth.getCurrentUser();
-                if(user != null) {
-                    //startActivity(new Intent(LoginActivity.this, MainActivity.class));
-
-                    //User is signed in
-                    Log.d(TAG, "onAuthStateChanged:signed_in: " + user.getUid());
-                    finish();
-                }
-                else {
-                    //user is signed out
-                    showProgress(false);
-                    Log.d(TAG, "onAuthStateChanged:signed_out");
-                }
-            }
-
-        };
-
-        //Delete before launch
         mEmailView.setText(DUMMY_CREDENTIALS[0]);
         mPasswordView.setText(DUMMY_CREDENTIALS[1]);
-
-
 
     }
 
@@ -205,17 +171,12 @@ public class LoginActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
     }
 
-    //assigns firebase login state listener to our Authenticator
     @Override
     protected void onStart() {
         super.onStart();
-        mAuth.addAuthStateListener(mAuthListener);
     }
     protected void onStop() {
         super.onStop();
-        if(mAuthListener != null) {
-            mAuth.removeAuthStateListener(mAuthListener);
-        }
     }
 
     private void populateAutoComplete() {
@@ -229,12 +190,6 @@ public class LoginActivity extends AppCompatActivity {
         return true;
     }
 
-
-    /**
-     * Attempts to sign in or register the account specified by the login form.
-     * If there are form errors (invalid email, missing fields, etc.), the
-     * errors are presented and no actual login attempt is made.
-     */
     private void attemptLogin() {
         if (mAuthTask != false) {
             return;
@@ -280,8 +235,10 @@ public class LoginActivity extends AppCompatActivity {
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
             showProgress(true);
+            //gets a Firebase Authenticator
+            mAuth = FirebaseAuth.getInstance();
             mAuthTask = true;
-            //signs into your firebase account if you give valid credientials
+            //signs into your firebase account if you give valid credentials
             mAuth.signInWithEmailAndPassword(email, password)
                     .addOnCompleteListener(LoginActivity.this, new OnCompleteListener<AuthResult>() {
                         @Override
@@ -299,14 +256,10 @@ public class LoginActivity extends AppCompatActivity {
                                         Toast.LENGTH_SHORT).show();
                             } else {
                                 mAuthTask = false;
-                                finish();
                             }
                         }
                     });
-            //return true;
 
-            //mAuthTask = new UserLoginTask(email, password);
-            //mAuthTask.execute((Void) null);
         }
     }
 
@@ -367,58 +320,9 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     @Override
-    public void finish() {
-        showProgress(false);
-        super.finish();
-    }
-
-    @Override
     public void onBackPressed() {
-        //should terminate application on back button pressed]
-        //.finish();
-        super.onBackPressed();
+        //should terminate application on back button pressed
+        finish();
     }
-
-    /**
-     * Represents an asynchronous login/registration task used to authenticate
-     * the user.
-     */
-//    public class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
-//
-//        private final String mEmail;
-//        private final String mPassword;
-//
-//        UserLoginTask(String email, String password) {
-//            mEmail = email;
-//            mPassword = password;
-//            doInBackground();
-//        }
-//
-//        @Override
-//        protected Boolean doInBackground(Void... params) {
-//            // TODO: attempt authentication against a network service.
-//
-//
-//
-//
-//        @Override
-//        protected void onPostExecute(final Boolean success) {
-//            mAuthTask = null;
-//            showProgress(false);
-//
-//            if (success) {
-//                finish();
-//            } else {
-//                mPasswordView.setError(getString(R.string.error_incorrect_password));
-//                mPasswordView.requestFocus();
-//            }
-//        }
-//
-//        @Override
-//        protected void onCancelled() {
-//            mAuthTask = null;
-//            showProgress(false);
-//        }
-//    }
 }
 

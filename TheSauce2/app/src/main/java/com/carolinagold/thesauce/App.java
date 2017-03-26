@@ -11,15 +11,11 @@ import com.google.firebase.database.FirebaseDatabase;
 
 public class App extends Application {
 
-    FirebaseDatabase database;
 
     @Override
     public void onCreate() {
         super.onCreate();
 
-        //database = FirebaseDatabase.getInstance();
-        //DatabaseReference myRef = database.getReference("message");
 
-        //FireBase.setAndroidContext(this);
     }
 }

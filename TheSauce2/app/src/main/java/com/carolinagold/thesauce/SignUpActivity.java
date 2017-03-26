@@ -81,8 +81,6 @@ public class SignUpActivity extends AppCompatActivity {
 
     //google database object
     private FirebaseAuth mAuth;
-    //tracks when user signs in or out
-    private FirebaseAuth.AuthStateListener mAuthListener;
     //tag for Log statements for debugging
     private String TAG = "SignUpActivity";
     private String displayName;
@@ -102,50 +100,6 @@ public class SignUpActivity extends AppCompatActivity {
     private void prepare() {
         mAuth = FirebaseAuth.getInstance();
 
-
-        mAuthListener = new FirebaseAuth.AuthStateListener() {
-            @Override
-            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
-                //gets the user to see if he is signed in or not
-                FirebaseUser user = firebaseAuth.getCurrentUser();
-                if (user != null) {
-
-                    //User account has been created and they are now signed in.
-
-                    //set new user's display name
-                    UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
-                            .setDisplayName(displayName)
-                            .build();
-
-                    user.updateProfile(profileUpdates)
-                            .addOnCompleteListener(new OnCompleteListener<Void>() {
-                                @Override
-                                public void onComplete(@NonNull Task<Void> task) {
-                                    if (task.isSuccessful()) {
-                                        Log.d(TAG, "User profile updated.");
-                                    }
-                                }
-                            });
-
-
-                    //go to main activity now that user has account
-//                    FirebaseStorage storage = FirebaseStorage.getInstance();
-//                    StorageReference storageRef = storage.getReferenceFromUrl(getResources().getString(R.string.firebase_storage_bucket_name));
-//
-//                    String uId = user.getUid();
-//                    FirebaseDatabase database = FirebaseDatabase.getInstance();
-//                    DatabaseReference myRef = database.getReference("userProfileInfo");
-//                    myRef.child(uId).child("userDisplayPicturePath").setValue(getResources().getString(R.string.dummyProfilePicDownloadUrl));
-
-                    startActivity(new Intent(SignUpActivity.this, MainActivity.class));
-                    Log.d(TAG, "onAuthStateChanged:signed_in:" + user.getUid());
-                } else {
-                    // User is signed out
-                    Log.d(TAG, "onAuthStateChanged:signed_out");
-                }
-                // ...
-            }
-        };
 
 
         // Set up the login form.
@@ -246,53 +200,36 @@ public class SignUpActivity extends AppCompatActivity {
             // form field with an error.
             focusView.requestFocus();
         } else {
-            // Show a progress spinner, and kick off a background task to
-            // perform the user login attempt.
-            showProgress(true);
-            mAuth.createUserWithEmailAndPassword(email,passwordConfirm).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-                @Override
-                public void onComplete(@NonNull Task<AuthResult> task) {
-                    Toast.makeText(SignUpActivity.this, "createUserWithEmail:onComplete:" + task.isSuccessful(), Toast.LENGTH_SHORT).show();
-                    showProgress(false);
-                    // If sign in fails, display a message to the user. If sign in succeeds
-                    // the auth state listener will be notified and logic to handle the
-                    // signed in user can be handled in the listener.
-                    if (!task.isSuccessful()) {
-                        Toast.makeText(SignUpActivity.this, "Authentication failed.", Toast.LENGTH_LONG).show();
-                    } else {
 
-                        new AlertDialog.Builder(SignUpActivity.this)
-                                .setTitle("Camera or Gallery")
-                                .setMessage("Please select a profile picture")
-                                .setPositiveButton(getResources().getString(R.string.choose_gallery), new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog, int which) {
-                                        Intent galleryIntent;
-                                        // if(haveREStoragePermission && haveEXStoragePermission) {
-                                        galleryIntent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-                                        startActivityForResult(galleryIntent, RESULT_FROM_GALLERY);
-                                        //}
-                                    }
-                                })
-                                .setNegativeButton(getResources().getString(R.string.choose_camera), new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog, int which) {
+            new AlertDialog.Builder(SignUpActivity.this)
+                    .setTitle("Camera or Gallery")
+                    .setMessage("Please select a profile picture")
+                    .setPositiveButton(getResources().getString(R.string.choose_gallery), new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            Intent galleryIntent;
+                            // if(haveREStoragePermission && haveEXStoragePermission) {
+                            galleryIntent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                            startActivityForResult(galleryIntent, RESULT_FROM_GALLERY);
+                            //}
+                        }
+                    })
+                    .setNegativeButton(getResources().getString(R.string.choose_camera), new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
 
 
 
 
 
 
-                                        //if (haveCameraPermission) {
-                                        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                                        if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
-                                            startActivityForResult(takePictureIntent, RESULT_FROM_CAMERA);
-                                        }
-                                        // }
-                                    }
-                                }).setIcon(android.R.drawable.ic_dialog_alert)
-                                .show();
-                    }
-                }
-            });
+                            //if (haveCameraPermission) {
+                            Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                            if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
+                                startActivityForResult(takePictureIntent, RESULT_FROM_CAMERA);
+                            }
+                            // }
+                        }
+                    }).setIcon(android.R.drawable.ic_dialog_alert)
+                    .show();
         }
     }
     Bitmap bitmap;
@@ -319,45 +256,68 @@ public class SignUpActivity extends AppCompatActivity {
 
         if(photoChosen) {
 
-            final FirebaseUser user = mAuth.getCurrentUser();
-            FirebaseStorage storage = FirebaseStorage.getInstance();
-            StorageReference storageRef = storage.getReferenceFromUrl(getResources().getString(R.string.firebase_storage_bucket_name));
-            Calendar calendar = Calendar.getInstance();
-            storageRef = storageRef.child("UserProfile").child(user.getUid()).child(Long.toString(calendar.getTimeInMillis()));
+            String email = mEmailView.getText().toString();
+            String password = mPasswordView.getText().toString();
 
-            try {
-                //Bitmap bitmap = MediaStore.Images.Media.getBitmap(context.getContentResolver(), Uri.parse(imagePath));
-                ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
-                final byte[] theData = baos.toByteArray();
+            // Show a progress spinner, and kick off a background task to
+            // perform the user login attempt.
+            showProgress(true);
+            mAuth.createUserWithEmailAndPassword(email,password).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+                @Override
+                public void onComplete(@NonNull Task<AuthResult> task) {
+                    Toast.makeText(SignUpActivity.this, "createUserWithEmail:onComplete:" + task.isSuccessful(), Toast.LENGTH_SHORT).show();
+                    showProgress(false);
+                    // If sign in fails, display a message to the user. If sign in succeeds
+                    // the auth state listener will be notified and logic to handle the
+                    // signed in user can be handled in the listener.
+                    if (!task.isSuccessful()) {
+                        Toast.makeText(SignUpActivity.this, "Authentication failed.", Toast.LENGTH_LONG).show();
+                    } else {
+                        final FirebaseUser user = task.getResult().getUser();
+                        FirebaseStorage storage = FirebaseStorage.getInstance();
+                        StorageReference storageRef = storage.getReferenceFromUrl(getResources().getString(R.string.firebase_storage_bucket_name));
+                        Calendar calendar = Calendar.getInstance();
+                        storageRef = storageRef.child("UserProfile").child(user.getUid()).child(Long.toString(calendar.getTimeInMillis()));
 
-                UploadTask uploadTask = storageRef.putBytes(theData);
-                uploadTask.addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception exception) {
-                        // Handle unsuccessful uploads
-                        signUpButton.setClickable(true);
+                        try {
+                            //Bitmap bitmap = MediaStore.Images.Media.getBitmap(context.getContentResolver(), Uri.parse(imagePath));
+                            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+                            final byte[] theData = baos.toByteArray();
+
+                            UploadTask uploadTask = storageRef.putBytes(theData);
+                            uploadTask.addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception exception) {
+                                    // Handle unsuccessful uploads
+                                    signUpButton.setClickable(true);
+                                }
+                            }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+
+                                @Override
+                                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                                    signUpButton.setClickable(true);
+
+                                    Uri downloadUrl = taskSnapshot.getDownloadUrl();
+                                    String name = taskSnapshot.getMetadata().getName();
+                                    FirebaseDatabase database = FirebaseDatabase.getInstance();
+                                    DatabaseReference myUserProfileInfoRef = database.getReference("userProfileInfo").child(user.getUid());
+
+                                    myUserProfileInfoRef.child("userName").setValue(displayName);
+                                    myUserProfileInfoRef.child("userDisplayPicturePath").setValue(downloadUrl.toString());
+                                    SignUpActivity.this.finish();
+                                }
+                            });
+                        } catch (Exception e) {
+                            Log.i(Logs.ERROR_IN_TRY, "Exception");
+                            e.printStackTrace();
+                        }
+
                     }
-                }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                }
+            });
 
-                    @Override
-                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                        signUpButton.setClickable(true);
 
-                        Uri downloadUrl = taskSnapshot.getDownloadUrl();
-                        String name = taskSnapshot.getMetadata().getName();
-                        FirebaseDatabase database = FirebaseDatabase.getInstance();
-                        DatabaseReference myUserProfileInfoRef = database.getReference("userProfileInfo").child(user.getUid());
-
-                        myUserProfileInfoRef.child("userName").setValue(displayName);
-                        myUserProfileInfoRef.child("userDisplayPicturePath").setValue(downloadUrl.toString());
-                        SignUpActivity.this.finish();
-                    }
-                });
-            } catch (Exception e) {
-                Log.i(Logs.ERROR_IN_TRY, "Exception");
-                e.printStackTrace();
-            }
         }
     }
 

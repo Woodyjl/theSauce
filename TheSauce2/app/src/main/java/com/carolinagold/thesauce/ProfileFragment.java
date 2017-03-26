@@ -31,7 +31,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-
+import java.util.Stack;
 
 
 public class ProfileFragment extends Fragment implements View.OnLongClickListener {
@@ -166,7 +166,6 @@ public class ProfileFragment extends Fragment implements View.OnLongClickListene
         });
     }
 
-    // TODO: Rename method, update argument and hook method into UI event
     public void onButtonPressed(Uri uri) {
         if (mListener != null) {
             mListener.onFragmentInteraction(uri);

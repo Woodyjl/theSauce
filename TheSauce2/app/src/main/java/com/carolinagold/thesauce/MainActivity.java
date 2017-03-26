@@ -43,20 +43,11 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements OnFragmentInteractionListener {
 
-    private static final int LOGIN_ACTIVITY = 0;
-    /**
-     * The {@link android.support.v4.view.PagerAdapter} that will provide
-     * fragments for each of the sections. We use a
-     * {@link FragmentPagerAdapter} derivative, which will keep every
-     * loaded fragment in memory. If this becomes too memory intensive, it
-     * may be best to switch to a
-     * {@link android.support.v4.app.FragmentStatePagerAdapter}.
-     */
+    public static final int LOGIN_ACTIVITY = 0;
+
     private SectionsPagerAdapter mSectionsPagerAdapter;
 
-    /**
-     * The {@link ViewPager} that will host the section contents.
-     */
+
     private static final int POST_CREATE_ACTIVITY = 1;
 
     private ViewPager mViewPager;
@@ -85,6 +76,7 @@ public class MainActivity extends AppCompatActivity implements OnFragmentInterac
 
         Log.i(Logs.POINT_OF_INTEREST, "checkPoint");
         mAuth = FirebaseAuth.getInstance();
+
         //tracks when user signs in or out
         mAuthListener = new FirebaseAuth.AuthStateListener() {
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
@@ -95,7 +87,7 @@ public class MainActivity extends AppCompatActivity implements OnFragmentInterac
                     user is signed in, stay in the main activity
                      */
                     Log.d(TAG, "onAuthStateChanged:signed_in:" + user.getUid());
-
+                    finishActivity(LOGIN_ACTIVITY);
                 }
                 else {
                     /*
@@ -116,7 +108,7 @@ public class MainActivity extends AppCompatActivity implements OnFragmentInterac
         //getSupportActionBar().setDisplayHomeAsUpEnabled(false);
         // Create the adapter that will return a fragment for each of the three
         // primary sections of the activity.
-        mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
+        //mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
 
 
         mViewPager = (ViewPager) findViewById(R.id.container);
@@ -170,28 +162,28 @@ public class MainActivity extends AppCompatActivity implements OnFragmentInterac
                 }
                 break;
             case LOGIN_ACTIVITY:
-                recreate();
+                if(resultCode == RESULT_CANCELED)
+                    finish();
+                else
+                    recreate();
+
                 break;
         }
 
     }
 
     boolean onProfileFrag = false;
-    int counter = 0;
 
     TabLayout.OnTabSelectedListener tabSelectedListener = new TabLayout.OnTabSelectedListener() {
         @Override
         public void onTabSelected(TabLayout.Tab tab) {
             Log.i(Logs.POINT_OF_INTEREST,  "In tab listener");
             mViewPager.setCurrentItem(tab.getPosition());
-            if(tab.getPosition() == 1 && counter > 1) {
+            if(tab.getPosition() == 1 ) {
                 onProfileFrag = true;
-                profileFragment.getAllProfilePost();
-            } else if (counter > 1) {
+            } else {
                 onProfileFrag = false;
-                newFeedFragment.getLatestPost();
             }
-            counter++;
         }
 
         @Override
@@ -225,73 +217,6 @@ public class MainActivity extends AppCompatActivity implements OnFragmentInterac
     }
 
 
-
-//        ChildEventListener childEventListener = new ChildEventListener() {
-//            @Override
-//            public void onChildAdded(DataSnapshot dataSnapshot, String previousChildName) {
-//                Log.d(TAG, "onChildAdded:" + dataSnapshot.getKey());
-//
-//                // A new comment has been added, add it to the displayed list
-//                Comment comment = dataSnapshot.getValue(Comment.class);
-//
-//                // ...
-//            }
-//
-//            @Override
-//            public void onChildChanged(DataSnapshot dataSnapshot, String previousChildName) {
-//                Log.d(TAG, "onChildChanged:" + dataSnapshot.getKey());
-//
-//                // A comment has changed, use the key to determine if we are displaying this
-//                // comment and if so displayed the changed comment.
-//                Comment newComment = dataSnapshot.getValue(Comment.class);
-//                String commentKey = dataSnapshot.getKey();
-//
-//                // ...
-//            }
-//
-//            @Override
-//            public void onChildRemoved(DataSnapshot dataSnapshot) {
-//                Log.d(TAG, "onChildRemoved:" + dataSnapshot.getKey());
-//
-//                // A comment has changed, use the key to determine if we are displaying this
-//                // comment and if so remove it.
-//                String commentKey = dataSnapshot.getKey();
-//
-//                // ...
-//            }
-//
-//            @Override
-//            public void onChildMoved(DataSnapshot dataSnapshot, String previousChildName) {
-//                Log.d(TAG, "onChildMoved:" + dataSnapshot.getKey());
-//
-//                // A comment has changed position, use the key to determine if we are
-//                // displaying this comment and if so move it.
-//                Comment movedComment = dataSnapshot.getValue(Comment.class);
-//                String commentKey = dataSnapshot.getKey();
-//
-//                // ...
-//            }
-//
-//            @Override
-//            public void onCancelled(DatabaseError databaseError) {
-//                Log.w(TAG, "postComments:onCancelled", databaseError.toException());
-//                Toast.makeText(mContext, "Failed to load comments.",
-//                        Toast.LENGTH_SHORT).show();
-//            }
-//        };
-//        ref.addChildEventListener(childEventListener);
-
-
-        // Last 100 posts, these are automatically the 100 most recent
-        // due to sorting by push() keys
-//        Query recentPostsQuery = databaseReference.child("posts")
-//                .limitToFirst(100);// Last 100 posts, these are automatically the 100 most recent
-//        // due to sorting by push() keys
-//        Query recentPostsQuery = databaseReference.child("posts")
-//                .limitToFirst(100);
-
-
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -316,27 +241,6 @@ public class MainActivity extends AppCompatActivity implements OnFragmentInterac
                 user = mAuth.getCurrentUser();
                 if(user != null)
                     mAuth.signOut();
-
-                mAuthListener = new FirebaseAuth.AuthStateListener() {
-                    public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
-                        user = firebaseAuth.getCurrentUser();
-
-                        if(user != null) {
-                    /*
-                    user is signed in, stay in the main activity
-                     */
-                            Log.d(TAG, "onAuthStateChanged:signed_in:" + user.getUid());
-                        }
-                        else {
-                    /*
-                    user is signed out, take them to the login screen
-                     */
-                            Log.d(TAG, "onAuthStateChanged:signed_out");
-                            startActivity(new Intent(MainActivity.this, LoginActivity.class));
-                        }
-                    }
-
-                };
 
                 return true;
             case R.id.refresh:
