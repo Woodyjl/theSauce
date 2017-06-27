@@ -1,7 +1,7 @@
 # theSauce
 This is the sauce
 
-note: programming technics could have been done better
+note: programming techniques could have been done better
 
 This is a photo logging application.
 
